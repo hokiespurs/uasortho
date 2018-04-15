@@ -26,9 +26,10 @@ sol = solve(EQ,[Xw,Yw,Zw]);
 strXeqn = sprintf('Xw = %s',sol.Xw);
 strYeqn = sprintf('Yw = %s',sol.Yw);
 
-oldstr = {'sin','cos','f','cx','cy','Xc','Yc','Zc','roll','pitch','yaw'}; 
+oldstr = {'sin','cos','^','f','cx','cy','Xc','Yc','Zc','roll','pitch','yaw'}; 
 newstr = {'Math.sin',...
              'Math.cos',...
+             '**',...
              'this.IO.f',...
              'this.IO.cx',...
              'this.IO.cy',...
@@ -42,8 +43,8 @@ for i=1:numel(oldstr)
     strXeqn = strrep(strXeqn,oldstr{i},newstr{i});
     strYeqn = strrep(strYeqn,oldstr{i},newstr{i});
 end
-strXeqn = linewrap([strXeqn ';'],100);
-strYeqn = linewrap([strYeqn ';'],100);
+strXeqn = linewrap([strXeqn ';'],10000);
+strYeqn = linewrap([strYeqn ';'],10000);
 clc
 for i=1:numel(strXeqn)
     fprintf('%s\n',strXeqn{i});
