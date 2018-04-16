@@ -22,6 +22,13 @@ class Camera {
         this.IO = iIO;
         this.EO = iEO;
     }
+    // footprint
+    // readrawfootprint
+    // polygon
+    // calcfootprint
+    // marker
+    // redrawmarker
+
 
     // Getters
 
@@ -36,4 +43,5 @@ class Camera {
 
         return [Xw, Yw];
     }
+    // uv2gsd
 }
