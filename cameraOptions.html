@@ -4,40 +4,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="css/customSlider.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 <body>
 
 <h1>Camera Position</h1>
 <div class="slidecontainer" style="width:100%">
     Altitude:
-    <input title="Altitude" type="number" step="1" id="altnum" value="120" min="10" max="1000">meters
-    <input title="Altitude" type="range" min="10" max="1000" value="120" class="slider" id="altslider">
+    <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
+    meters
+    <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
 </div>
+
 <div class="slidecontainer" style="width:100%">
     Roll:
-    <input title="Roll" type="number" step="1" id="rollnum" value="0" min="-90" max="90">degrees
-    <input title="Roll" type="range" min="-90" max="90" value="0" class="slider" id="rollslider">
+    <input id="rollnumber" class="numinput" title="Roll" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="rollslider" class="slider"   title="Roll" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
 </div>
+
 <div class="slidecontainer" style="width:100%">
     Pitch:
-    <input title="Pitch" type="number" step="1" id="pitchnum" value="0" min="-90" max="90">degrees
-    <input title="Pitch" type="range" min="-90" max="90" value="0" class="slider" id="pitchslider">
+    <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
 </div>
+
 <div class="slidecontainer" style="width:100%">
     Yaw:
-    <input title="Yaw" type="number" step="1" id="yawnum" value="0" min="0" max="360">degrees
-    <input title="Yaw" type="range" min="0" max="360" value="0" class="slider" id="yawslider">
+    <input id="yawnumber" class="numinput" title="Yaw" type="number" min="0" max="360" value="180" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="180" oninput="updateText(this)">
 </div>
 
 <script>
-    document.getElementById("altslider").oninput = function(){document.getElementById("altnum").value = this.value;};
-    document.getElementById("altnum").oninput = function(){document.getElementById("altslider").value = this.value;};
-    document.getElementById("rollslider").oninput = function(){document.getElementById("rollnum").value = this.value;};
-    document.getElementById("rollnum").oninput = function(){document.getElementById("rollslider").value = this.value;};
-    document.getElementById("pitchslider").oninput = function(){document.getElementById("pitchnum").value = this.value;};
-    document.getElementById("pitchnum").oninput = function(){document.getElementById("pitchslider").value = this.value;};
-    document.getElementById("yawslider").oninput = function(){document.getElementById("yawnum").value = this.value;};
-    document.getElementById("yawnum").oninput = function(){document.getElementById("yawslider").value = this.value;};
+    function updateSlider(elem) {
+        $(elem).next().val($(elem).val());
+        updateCamVars();
+    }
+    function updateText(elem) {
+        $(elem).prev().val($(elem).val());
+        updateCamVars();
+    }
+    function updateCamVars() {
+        alt = $("#altnumber").val();
+        roll = $("#rollnumber").val() * Math.PI/180;
+        pitch = $("#pitchnumber").val() * Math.PI/180;
+        yaw = $("#yawnumber").val() * Math.PI/180;
+    }
 </script>
 
 </body>
