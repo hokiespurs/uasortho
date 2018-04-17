@@ -62,9 +62,9 @@
 
             <div class="slidecontainer" style="width:100%">
                 Pitch:
-                <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+                <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="0" max="90" value="0" step="1" oninput="updateSlider(this)">
                 deg
-                <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
+                <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="0" max="90" value="0" oninput="updateText(this)">
             </div>
 
             <div class="slidecontainer" style="width:100%">
@@ -109,6 +109,16 @@
         myCamera.EO.yaw = $("#yawnumber").val() * Math.PI/180;
         myCamera.redraw();
     }
+    function updateInputFields() {
+        $("#altnumber").val(myCamera.EO.Zc);
+        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI));
+        $("#pitchnumber").val(Math.round(myCamera.EO.roll * 180/Math.PI - Math.PI));
+        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI));
+        $("#altslider").val(myCamera.EO.Zc);
+        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI));
+        $("#pitchslider").val(Math.round(myCamera.EO.roll * 180/Math.PI - Math.PI));
+        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI));
+    }
 </script>
 
 <script>
@@ -127,7 +137,7 @@
 
     var myCamera = new Camera(
         new IO(4000,4000,3000),
-        new EO(44.56576, -123.27888, 200, -40 * Math.PI/180, 180* Math.PI/180, 0* Math.PI/180));
+        new EO(44.56738, -123.27484, 200, 0, 0, 0));
     myCamera.addtomap(mymap);
     updateCamVars();
     // Create point feature for UAS

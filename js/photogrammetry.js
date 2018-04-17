@@ -35,7 +35,8 @@ class Camera {
         this.uasmarker = new L.Marker([iEO.lat, iEO.lon],{icon: uasicon, draggable: true});
         this.uasmarker.on("drag",this.updateEO,this);
 
-        this.centermarker = new L.Marker(this.centerpoint);
+        this.centermarker = new L.Marker(this.centerpoint,{icon: crosshairicon, draggable: true});
+        this.centermarker.on("drag",this.updateEOPitchYaw,this);
 
         this.footprintpolygon = new L.Polygon(this.footprint,{
             color: 'orange',
@@ -51,6 +52,21 @@ class Camera {
         this.EO.lon = this.uasmarker.getLatLng().lng;
         this.EO.calcUTM();
         this.redraw();
+    }
+    updateEOPitchYaw() {
+        var x = this.EO.Xc - this.centermarker.getLatLng().utm().x;
+        var y = this.EO.Yc - this.centermarker.getLatLng().utm().y;
+        var z = this.EO.Zc - 0;
+
+        var rho = Math.sqrt(x**2 + y**2 + z**2);
+        var phi = Math.atan2(y, x) + Math.PI/2;
+        var theta = Math.acos(z/rho);
+
+        this.EO.roll = theta;
+        this.EO.yaw = phi;
+
+        this.redraw();
+        updateInputFields();
     }
     // Methods
     addtomap(mapname) {
@@ -96,8 +112,11 @@ class Camera {
     }
 
     calcutm2ll(xy) {
-        return [ L.utm({x: xy[0], y: xy[1], zone: this.EO.zone, band: this.EO.band}).latLng().lat,
-            L.utm({x: xy[0], y: xy[1], zone: this.EO.zone, band: this.EO.band}).latLng().lng];
+        var coordLatLng = L.utm({x: xy[0], y: xy[1], zone: this.EO.zone, band: this.EO.band}).latLng();
+        if (coordLatLng!=null) {
+            return [coordLatLng.lat, coordLatLng.lng];
+        }
+        return [0, 0]
     }
     // uv2gsd
 }

@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/customSlider.css" rel="stylesheet">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-<body>
-
 <h1>Camera Position</h1>
 <div class="slidecontainer" style="width:100%">
-    Altitude:
+    Altitude
     <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
     meters
     <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
@@ -36,23 +26,3 @@
     deg
     <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="180" oninput="updateText(this)">
 </div>
-
-<script>
-    function updateSlider(elem) {
-        $(elem).next().val($(elem).val());
-        updateCamVars();
-    }
-    function updateText(elem) {
-        $(elem).prev().val($(elem).val());
-        updateCamVars();
-    }
-    function updateCamVars() {
-        alt = $("#altnumber").val();
-        roll = $("#rollnumber").val() * Math.PI/180;
-        pitch = $("#pitchnumber").val() * Math.PI/180;
-        yaw = $("#yawnumber").val() * Math.PI/180;
-    }
-</script>
-
-</body>
-</html>
