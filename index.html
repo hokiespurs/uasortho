@@ -111,13 +111,13 @@
     }
     function updateInputFields() {
         $("#altnumber").val(myCamera.EO.Zc);
-        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI));
-        $("#pitchnumber").val(Math.round(myCamera.EO.roll * 180/Math.PI - Math.PI));
-        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI));
+        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
+        $("#pitchnumber").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
         $("#altslider").val(myCamera.EO.Zc);
-        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI));
-        $("#pitchslider").val(Math.round(myCamera.EO.roll * 180/Math.PI - Math.PI));
-        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI));
+        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
+        $("#pitchslider").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
     }
 </script>
 
