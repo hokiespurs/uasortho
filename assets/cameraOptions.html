@@ -1,0 +1,28 @@
+<h1>Camera Position</h1>
+<div class="slidecontainer" style="width:100%">
+    Altitude
+    <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
+    meters
+    <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
+</div>
+
+<div class="slidecontainer" style="width:100%">
+    Roll:
+    <input id="rollnumber" class="numinput" title="Roll" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="rollslider" class="slider"   title="Roll" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
+</div>
+
+<div class="slidecontainer" style="width:100%">
+    Pitch:
+    <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
+</div>
+
+<div class="slidecontainer" style="width:100%">
+    Yaw:
+    <input id="yawnumber" class="numinput" title="Yaw" type="number" min="0" max="360" value="180" step="1" oninput="updateSlider(this)">
+    deg
+    <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="180" oninput="updateText(this)">
+</div>

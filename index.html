@@ -11,11 +11,18 @@
     <!-- Awesome Font -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    // For Sliders
+    <link href="css/customSlider.css" rel="stylesheet">
+
+    <!-- leaflet sidebar -->
     <link rel="stylesheet" href="css/leaflet-sidebar.css" />
-    <!-- Custom leaflet icon and visuals-->
-    <script src="js/customLeaflet.js"></script>
-    <!-- Photogrammetry Equations-->
-    <script src="js/photogrammetry.js"></script>
+    <script src="js/leaflet-sidebar.js"></script>
+
+
+    <script src="js/customLeaflet.js"></script>  // UAS icon
+    <script src="js/photogrammetry.js"></script> // Photogrammetry Equations
 
 </head>
 <body>
@@ -38,20 +45,34 @@
     <!-- Tab panes -->
     <div class="sidebar-content">
         <div class="sidebar-pane" id="home">
-            <h1 class="sidebar-header">
-                sidebar-v2
-                <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-            </h1>
+            <h1>Camera Position</h1>
+            <div class="slidecontainer" style="width:100%">
+                Altitude:
+                <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
+                meters
+                <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
+            </div>
 
-            <p>A responsive sidebar for mapping libraries like <a href="http://leafletjs.com/">Leaflet</a> or <a href="http://openlayers.org/">OpenLayers</a>.</p>
+            <div class="slidecontainer" style="width:100%">
+                Roll:
+                <input id="rollnumber" class="numinput" title="Roll" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
+                deg
+                <input id="rollslider" class="slider"   title="Roll" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
+            </div>
 
-            <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+            <div class="slidecontainer" style="width:100%">
+                Pitch:
+                <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="0" max="90" value="0" step="1" oninput="updateSlider(this)">
+                deg
+                <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="0" max="90" value="0" oninput="updateText(this)">
+            </div>
 
-            <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-
-            <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-
-            <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+            <div class="slidecontainer" style="width:100%">
+                Yaw:
+                <input id="yawnumber" class="numinput" title="Yaw" type="number" min="0" max="360" value="180" step="1" oninput="updateSlider(this)">
+                deg
+                <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="180" oninput="updateText(this)">
+            </div>
         </div>
 
         <div class="sidebar-pane" id="profile">
@@ -71,7 +92,34 @@
 // div to hold the map
 <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
 
-<script src="js/leaflet-sidebar.js"></script>
+//script for sliders
+<script>
+    function updateSlider(elem) {
+        $(elem).next().val($(elem).val());
+        updateCamVars();
+    }
+    function updateText(elem) {
+        $(elem).prev().val($(elem).val());
+        updateCamVars();
+    }
+    function updateCamVars() {
+        myCamera.EO.Zc = $("#altnumber").val();
+        myCamera.EO.pitch = $("#rollnumber").val() * Math.PI/180;
+        myCamera.EO.roll = $("#pitchnumber").val() * Math.PI/180 + Math.PI;
+        myCamera.EO.yaw = $("#yawnumber").val() * Math.PI/180;
+        myCamera.redraw();
+    }
+    function updateInputFields() {
+        $("#altnumber").val(myCamera.EO.Zc);
+        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
+        $("#pitchnumber").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
+        $("#altslider").val(myCamera.EO.Zc);
+        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
+        $("#pitchslider").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
+    }
+</script>
 
 <script>
 
@@ -87,81 +135,16 @@
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(mymap);
 
+    var myCamera = new Camera(
+        new IO(4000,4000,3000),
+        new EO(44.56738, -123.27484, 200, 0, 0, 0));
+    myCamera.addtomap(mymap);
+    updateCamVars();
     // Create point feature for UAS
-    var uasPoint = L.marker([44.56822, -123.28034],{icon: uasicon, draggable: true}).addTo(mymap);
-    uasPoint.bindPopup("<h3>Wilkinson Hall</h3><p>Corvallis, Oregon<br>College of Earth, Ocean, and Atmostpheric Sciences</p>");
-
-    // create EO, IO, and Camera
-    function reDrawOrtho() {
-        var myIO = new IO(4000, 4000, 3000);
-        var Xc = uasPoint.getLatLng().utm().x;
-        var Yc = uasPoint.getLatLng().utm().y;
-        var Zc = 1000;
-        var roll = 15 * Math.PI/180;
-        var pitch = 160 * Math.PI / 180;
-        var yaw = 225 * Math.PI/180;
-        var myEO = new EO(Xc, Yc, Zc, roll, pitch, yaw);
-        var myCamera = new Camera(myIO, myEO);
-        var newXY = myCamera.calcSpaceIntersection(2000, 1500);
-        console.debug(newXY);
-        var newPt = L.utm({
-            x: newXY[0],
-            y: newXY[1],
-            zone: uasPoint.getLatLng().utm().zone,
-            band: uasPoint.getLatLng().utm().band
-        });
-        var newMarker = L.marker([newPt.latLng().lat, newPt.latLng().lng]).addTo(mymap);
-
-        var box1 = L.utm({
-            x: myCamera.calcSpaceIntersection(1, 1)[0],
-            y: myCamera.calcSpaceIntersection(1, 1)[1],
-            zone: uasPoint.getLatLng().utm().zone,
-            band: uasPoint.getLatLng().utm().band
-        });
-        var box2 = L.utm({
-            x: myCamera.calcSpaceIntersection(1, 3000)[0],
-            y: myCamera.calcSpaceIntersection(1, 3000)[1],
-            zone: uasPoint.getLatLng().utm().zone,
-            band: uasPoint.getLatLng().utm().band
-        });
-        var box3 = L.utm({
-            x: myCamera.calcSpaceIntersection(4000, 3000)[0],
-            y: myCamera.calcSpaceIntersection(4000, 3000)[1],
-            zone: uasPoint.getLatLng().utm().zone,
-            band: uasPoint.getLatLng().utm().band
-        });
-        var box4 = L.utm({
-            x: myCamera.calcSpaceIntersection(4000, 1)[0],
-            y: myCamera.calcSpaceIntersection(4000, 1)[1],
-            zone: uasPoint.getLatLng().utm().zone,
-            band: uasPoint.getLatLng().utm().band
-        });
-
-        // Create area feature for Strand Ag Hall, style and add to map
-        var myArea = L.polygon([
-            [box1.latLng().lat, box1.latLng().lng],
-            [box2.latLng().lat, box2.latLng().lng],
-            [box3.latLng().lat, box3.latLng().lng],
-            [box4.latLng().lat, box4.latLng().lng]
-        ], {
-            color: 'orange',
-            weight: 5
-        }).addTo(mymap);
-    }
-    // Create an Empty Popup
-    var popup = L.popup();
-
-    // Write function to set Properties of the Popup
-    function onMapClick(e) {
-        popup
-            .setLatLng(e.latlng)
-            .setContent("You clicked the map at " + e.latlng.toString())
-            .openOn(mymap);
-    }
-    reDrawOrtho();
-    // Listen for a click event on the Map element
-    mymap.on('click', onMapClick);
-    uasPoint.on('dragend',reDrawOrtho);
+    // var uasPoint = L.marker([44.56822, -123.28034],{icon: uasicon, draggable: true}).addTo(mymap);
+    //
+    // // Listen for a click event on the Map element
+    // uasPoint.on('dragend',reDrawOrtho);
 </script>
 </body>
 </html>

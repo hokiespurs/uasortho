@@ -19,9 +19,10 @@ eqn = s.*[pixx;pixy;1]==K*P*xyz;
 EQ(1) = eqn(1)./eqn(3);
 EQ(2) = eqn(2)./eqn(3);
 EQ(3) = Zw==0;
+EQ(4) = eqn(3);
 
 % Solve for Xw and Yw
-sol = solve(EQ,[Xw,Yw,Zw]);
+sol = solve(EQ,[Xw,Yw,s]);
 
 strXeqn = sprintf('Xw = %s',sol.Xw);
 strYeqn = sprintf('Yw = %s',sol.Yw);
@@ -54,3 +55,4 @@ for i=1:numel(strYeqn)
     fprintf('%s\n',strYeqn{i});
 end
 % fprintf('Xw = %s\n',
+
