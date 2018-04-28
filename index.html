@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leaflet Map</title>
+    <title>UAS Ortho</title>
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/>
     <!-- Add the Leaflet JavaScript library -->
@@ -45,7 +45,7 @@
     <!-- Tab panes -->
     <div class="sidebar-content">
         <div class="sidebar-pane" id="home">
-            <h1>Camera Position</h1>
+            <h1 class="sidebar-header">Camera Position</h1>
             <div class="slidecontainer" style="width:100%">
                 Altitude:
                 <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
@@ -136,7 +136,7 @@
     }).addTo(mymap);
 
     var myCamera = new Camera(
-        new IO(4000,4000,3000),
+        new IO(3600,4000,3000),
         new EO(44.56738, -123.27484, 200, 0, 0, 0));
     myCamera.addtomap(mymap);
     updateCamVars();
