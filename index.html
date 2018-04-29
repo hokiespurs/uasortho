@@ -13,6 +13,8 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+    // for matrix math
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.1.2/math.min.js"></script>
     // For Sliders
     <link href="css/customSlider.css" rel="stylesheet">
 
@@ -112,11 +114,11 @@
     function updateInputFields() {
         $("#altnumber").val(myCamera.EO.Zc);
         $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchnumber").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#pitchnumber").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
         $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
         $("#altslider").val(myCamera.EO.Zc);
         $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchslider").val(Math.round(myCamera.EO.roll * 180/Math.PI*10)/10);
+        $("#pitchslider").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
         $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
     }
 </script>
@@ -136,7 +138,7 @@
     }).addTo(mymap);
 
     var myCamera = new Camera(
-        new IO(3600,4000,3000),
+        new IO(4000,4000,3000),
         new EO(44.56738, -123.27484, 200, 0, 0, 0));
     myCamera.addtomap(mymap);
     updateCamVars();

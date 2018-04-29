@@ -62,11 +62,11 @@ class Camera {
         var phi = Math.atan2(y, x) + Math.PI/2;
         var theta = Math.acos(z/rho);
 
-        this.EO.roll = theta;
+        this.EO.roll = theta + Math.PI;
         this.EO.yaw = phi;
-
-        this.redraw();
         updateInputFields();
+        this.redraw();
+
     }
     // Methods
     addtomap(mapname) {
@@ -93,11 +93,94 @@ class Camera {
     }
 
     calcfootprint() {
-        return [
-            this.calcutm2ll(this.calcSpaceIntersection(1, 1)),
-            this.calcutm2ll(this.calcSpaceIntersection(1, this.IO.totpixy)),
-            this.calcutm2ll(this.calcSpaceIntersection(this.IO.totpixx, this.IO.totpixy)),
-            this.calcutm2ll(this.calcSpaceIntersection(this.IO.totpixx, 1))];
+        var MAX_D = 5000;
+        // Calc Pixel corners
+        var horizonangle = Math.atan(MAX_D/this.EO.Zc);
+        var ifov = Math.atan2(1,this.IO.f);
+        var vfov = ifov * this.IO.totpixy;
+        var hfov = ifov * this.IO.totpixx;
+
+        var pix_of_corners = [[this.IO.totpixx, this.IO.totpixy],
+            [this.IO.totpixx, 1],
+            [1, 1],
+            [1, this.IO.totpixy]];
+
+        var az_center = this.EO.yaw;
+        var el_center = this.EO.roll + Math.PI;
+        while (el_center>(2*Math.PI)){
+            el_center = el_center - 2 * Math.PI;
+        }
+        var cornerazel =  [[hfov/2,  vfov/2],
+                       [hfov/2, -vfov/2],
+                       [-hfov/2, -vfov/2],
+                       [-hfov/2,  vfov/2]];
+
+        var R = [[Math.cos(this.EO.pitch), -Math.sin(this.EO.pitch)], [Math.sin(this.EO.pitch), Math.cos(this.EO.pitch)]];
+
+        var rotazel = math.multiply(cornerazel, R);
+        var i;
+        var azel_of_corners = Array(4);
+
+        for(i=0;i<4;i++){
+            var newazel = [math.add(rotazel[i][0],az_center), math.add(rotazel[i][1],el_center)];
+            azel_of_corners[i] = newazel;
+        }
+
+        var cornerpixraw = Array(8);
+        var cornerpixfinal = Array(8);
+        for(i=0;i<4;i++){
+            var val = [1, azel_of_corners[i][0], azel_of_corners[i][1], pix_of_corners[i][0],pix_of_corners[i][1]];
+            cornerpixraw[2*i] = val;
+            cornerpixraw[2*i+1] = [0, 0, 0, 0, 0];
+            cornerpixfinal[2*i] = val;
+            cornerpixfinal[2*i+1] = [0, 0, 0, 0, 0];
+        }
+
+        for(i=0;i<7;i+=2){
+            var i1 = i;
+            var i2 = i+2;
+            if(i2>7) {
+                i2 = 0;
+            }
+            var az1 = cornerpixraw[i1][1];
+            var el1 = cornerpixraw[i1][2];
+            var az2 = cornerpixraw[i2][1];
+            var el2 = cornerpixraw[i2][2];
+
+            var T = (horizonangle-el1)/(el2-el1);
+            console.log(T);
+            if(T>0 && T<1)
+            {
+                if (el1 > el2){
+                    cornerpixfinal[i1]=[0, 0, 0, 0, 0];
+                }
+                else {
+                    cornerpixfinal[i2]=[0, 0, 0, 0, 0];
+                }
+                var x1 = cornerpixraw[i1][3];
+                var y1 = cornerpixraw[i1][4];
+                var x2 = cornerpixraw[i2][3];
+                var y2 = cornerpixraw[i2][4];
+
+                var seg_xpix = x1 + (x2 - x1) * T;
+                var seg_ypix = y1 + (y2 - y1) * T;
+                var seg_az = az1 + (az2 - az1) * T;
+                var seg_el = el1 + (el2 - el1) * T;
+                cornerpixfinal[i1+1] = [1, seg_az, seg_el, seg_xpix, seg_ypix];
+            }
+        }
+
+        var finalcoords = Array();
+        console.log('NEW CAMERA ORIENTATION')
+        for(i=0;i<8;i++){
+            if (cornerpixfinal[i][0]==1 && cornerpixfinal[i][2]<=horizonangle) {
+                var goodpixelcoords = [cornerpixfinal[i][3],this.IO.totpixy - cornerpixfinal[i][4]];
+                console.log(goodpixelcoords);
+                finalcoords.push(this.calcutm2ll(this.calcSpaceIntersection(goodpixelcoords[0], goodpixelcoords[1])));
+            }
+        }
+
+        return finalcoords;
     }
     calcCenterPoint() {
         return this.calcutm2ll(this.calcSpaceIntersection(this.IO.cx, this.IO.cy));
