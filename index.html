@@ -10,127 +10,22 @@
     <script src="https://jjimenezshaw.github.io/Leaflet.UTM/L.LatLng.UTM.js"></script>
     <!-- Awesome Font -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    // for matrix math
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.1.2/math.min.js"></script>
-    // For Sliders
-    <link href="css/customSlider.css" rel="stylesheet">
-
-    <!-- leaflet sidebar -->
-    <link rel="stylesheet" href="css/leaflet-sidebar.css" />
-    <script src="js/leaflet-sidebar.js"></script>
-
-
-    <script src="js/customLeaflet.js"></script>  // UAS icon
+    <!-- My Photogrammetry Scripts -->
     <script src="js/photogrammetry.js"></script> // Photogrammetry Equations
-
+    <!-- Matrix Math -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.1.2/math.min.js"></script>
 </head>
 <body>
-// div to hold the sidebar
-<div id="sidebar" class="sidebar collapsed">
-    <!-- Nav tabs -->
-    <div class="sidebar-tabs">
-        <ul role="tablist">
-            <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#profile" role="tab"><i class="fa fa-user"></i></a></li>
-            <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li>
-            <li><a href="https://github.com/Turbo87/sidebar-v2" role="tab" target="_blank"><i class="fa fa-github"></i></a></li>
-        </ul>
-
-        <ul role="tablist">
-            <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
-        </ul>
-    </div>
-
-    <!-- Tab panes -->
-    <div class="sidebar-content">
-        <div class="sidebar-pane" id="home">
-            <h1 class="sidebar-header">Camera Position</h1>
-            <div class="slidecontainer" style="width:100%">
-                Altitude:
-                <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
-                meters
-                <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Roll:
-                <input id="rollnumber" class="numinput" title="Roll" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="rollslider" class="slider"   title="Roll" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Pitch:
-                <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="0" max="90" value="40" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="0" max="90" value="40" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Yaw:
-                <input id="yawnumber" class="numinput" title="Yaw" type="number" min="0" max="360" value="45" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="45" oninput="updateText(this)">
-            </div>
-        </div>
-
-        <div class="sidebar-pane" id="profile">
-            <h1 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        </div>
-
-        <div class="sidebar-pane" id="messages">
-            <h1 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        </div>
-
-        <div class="sidebar-pane" id="settings">
-            <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-        </div>
-    </div>
-</div>
-
 // div to hold the map
 <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
-
-//script for sliders
-<script>
-    function updateSlider(elem) {
-        $(elem).next().val($(elem).val());
-        updateCamVars();
-    }
-    function updateText(elem) {
-        $(elem).prev().val($(elem).val());
-        updateCamVars();
-    }
-    function updateCamVars() {
-        myCamera.EO.Zc = $("#altnumber").val();
-        myCamera.EO.pitch = $("#rollnumber").val() * Math.PI/180;
-        myCamera.EO.roll = $("#pitchnumber").val() * Math.PI/180 + Math.PI;
-        myCamera.EO.yaw = $("#yawnumber").val() * Math.PI/180;
-        myCamera.redraw();
-    }
-    function updateInputFields() {
-        $("#altnumber").val(myCamera.EO.Zc);
-        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchnumber").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
-        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
-        $("#altslider").val(myCamera.EO.Zc);
-        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchslider").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
-        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
-    }
-</script>
 
 <script>
 
     // Create variable to hold map element, give initial settings to map
     var mymap = L.map('mapid', {
         center: [44.56576, -123.27888],
-        zoom: 16
+        zoom: 14
     });
-    var sidebar = L.control.sidebar('sidebar').addTo(mymap);
 
     // Add OpenStreetMap tile layer to map element
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -138,15 +33,10 @@
     }).addTo(mymap);
 
     var myCamera = new Camera(
-        new IO(4000,4000,3000),
-        new EO(44.56738, -123.27484, 200, 0, 0, 0));
+        new IO(4000,4000,3000,'test'),
+        new EO(44.56738, -123.27484, 200, 30*Math.PI/180, 50*Math.PI/180, 0));
     myCamera.addtomap(mymap);
-    updateCamVars();
-    // Create point feature for UAS
-    // var uasPoint = L.marker([44.56822, -123.28034],{icon: uasicon, draggable: true}).addTo(mymap);
-    //
-    // // Listen for a click event on the Map element
-    // uasPoint.on('dragend',reDrawOrtho);
+
 </script>
 </body>
 </html>

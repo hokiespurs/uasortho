@@ -1,13 +1,57 @@
 function findHorizon(f,totpixx,totpixy,roll,pitch,yaw,horizonangle)
 totpixx = 4000;
 totpixy = 3000;
+cx = totpixx/2;
+cy = totpixy/2;
 f = 4000;
 
 yaw = 0;
-pitch = 70;
-roll = 40;
+pitch = 68;
+roll = 0;
 
-horizonangle = 1.550798992821746 * 180/pi;
+horizonangle = 85;
+
+Xc = 0;
+Yc = 0;
+Zc = 200;
+%
+cornerpix = [1 1;totpixx 1;totpixx totpixy;1 totpixy; 1 1; cx cy];
+
+%%
+K = [f 0 cx;0 f cy;0 0 1];
+
+% R2TaitBryan = [0 1 0;1 0 0;0 0 -1];
+% Rx = [1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)];
+% Ry = [cos(pitch) 0 -sin(pitch); 0 1 0;sin(pitch) 0 cos(pitch)];
+% Rz = [cos(yaw) sin(yaw) 0; -sin(yaw) cos(yaw) 0; 0 0 1];
+% R = Rx*Ry*Rz*R2TaitBryan;
+R_WORLD_2_AIR = [0 1 0;1 0 0;0 0 -1];
+R_AIR_2_CAMERA = [0 1 0;-1 0 0;0 0 1];
+R_AIR_ROLL = [1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)];
+R_AIR_PITCH = [cos(pitch) 0 -sin(pitch); 0 1 0;sin(pitch) 0 cos(pitch)];
+R_AIR_YAW = [cos(yaw) sin(yaw) 0; -sin(yaw) cos(yaw) 0; 0 0 1];
+R = R_AIR_2_CAMERA * R_AIR_ROLL * R_AIR_PITCH * R_AIR_YAW * R_WORLD_2_AIR;
+
+P = K * R * [eye(3) [-Xc;-Yc;-Zc]];
+
+P(4,:)=[0 0 0 1];
+
+iP = inv(P);
+
+for i=1:size(cornerpix,1)
+    xyz = iP*[cornerpix(i,1);cornerpix(i,2);1;1]-[Xc;Yc;Zc;1]
+   [az,el]=cart2sph(xyz(1),xyz(2),xyz(3));
+   allazel(i,:)=[az el+pi/2].*180/pi;
+end
+allazel
+
+f2 = figure(1);
+clf;
+plot(allazel(:,1),allazel(:,2),'r.-')
+axis equal
+
+
+
 %% Compute FOV Constants
 ifov = atan2d(1,f);
 vfov = ifov*totpixy;
