@@ -191,3 +191,5 @@ for ii=1:4
     end
     fprintf('%s',str)
 end
+
+%% Solve for Pitch and Yaw Given Roll

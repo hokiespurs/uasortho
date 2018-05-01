@@ -180,13 +180,28 @@ class Camera {
         this.gsdPixelResolution = 0;
 
 
-        this.uasmarker=new L.marker(this.EO.getLatLng, {draggable: true, icon: L.divIcon({className: 'fa fa-circle'})});
+        this.uasmarker=new L.marker(this.EO.getLatLng, {
+            draggable: true,
+            icon: L.divIcon({
+                html: '<i class="fa fa-camera-retro"></i>',
+                iconSize: [40, 40],
+                className: 'camera'
+            })
+        });
         this.uasmarker.on("drag",this.uasmarkermoved,this);
 
-        this.centermarker=new L.marker(this.centerpoint, {draggable: true, icon: L.divIcon({className: 'fa fa-plus-circle'})});
+        this.centermarker=new L.marker(this.centerpoint, {
+            draggable: true,
+            icon: L.divIcon({
+                html: '<i class="fa fa-bullseye"></i>',
+                iconSize: [40, 40],
+                className: 'target'
+            })
+        });
         this.centermarker.on("drag",this.uastargetmoved,this);
 
         this.footprintpolygon=new L.Polygon(this.footprint,{color:'orange', weight: 5});
+
         //this.gsdResolutionPolygons=0;
         //this.cameraHorizonView=0;
 
@@ -243,105 +258,78 @@ class Camera {
 
         this.updateAll();
     }
-    calcAzEl(pixx,pixy){
+    calcEl(pixx,pixy){
         var fullP = this.P.slice(0);
-        fullP.push([0, 0, 0, 1]);
-        var iP = math.inv(fullP);
-        var uvs1 = [pixx,pixy,1,1];
+        var iP = math.inv([[fullP[0][0], fullP[0][1], fullP[0][2]],
+                           [fullP[1][0], fullP[1][1], fullP[1][2]],
+                           [fullP[2][0], fullP[2][1], fullP[2][2]]]);
+        var uvs1 = [pixx,pixy,1];
         var xyz1 = math.multiply(iP,uvs1);
-        var XcYcZc = this.getXYZ;
-        var xyz_norm = math.add(xyz1,[-XcYcZc[0],-XcYcZc[1],-XcYcZc[2], -1]);
 
-        var rho_phi_theta = cart2sph(xyz_norm[0],xyz_norm[1],xyz_norm[2]);
+        var r = Math.sqrt((xyz1[0])**2+(xyz1[1])**2);
+        var el = Math.PI/2 + Math.atan2(xyz1[2],r);
 
-        return [-rho_phi_theta[1], rho_phi_theta[2]];
+        return el;
+    }
+    calcSegmentInterp(pix1, pix2, el1, el2, horizonangle, pixellist){
+        // Null Case: both points are above the horizon angle
+        if (el1>=horizonangle && el2>=horizonangle){return pixellist;}
+
+        // If first below horizon, push that point to pixellist
+        if (el1<horizonangle){
+            pixellist.push(pix1);
+            if (el2<horizonangle) {return pixellist;}
+        }
+
+        // Interpolate along segment
+         // find whether xpix or ypix are varying
+        var xvarying = false;
+        if (pix1[1]==pix2[1]){xvarying=true;}
+        // interpolate
+        var T = (horizonangle-el1)/(el2-el1);
+        if (xvarying){
+            var ypix = pix1[1];
+            var xpix = pix1[0] + (pix2[0] - pix1[0]) * T;
+            pixellist.push([xpix, ypix])
+        }
+        else {
+            var xpix = pix1[0];
+            var ypix = pix1[1] + (pix2[1] - pix1[1]) * T;
+            pixellist.push([xpix, ypix])
+        }
+        return pixellist;
     }
     // CALC FUNCTIONS
     calcCornerPixHorizonTrim() {
         // determine angle to not go over
-        console.log('NEW CAMERA ORIENTATION');
 
-        var MAX_D = 1500;
+        var MAX_D = 15000;
         var horizonangle = Math.atan(MAX_D/this.EO.Zc);
-
         // [ 4       1 ]
         // |           | Pixel corners in this order
         // |           |
         // [ 3       2 ]
 
-        var pix_of_corners = [[this.IO.totpixx, this.IO.totpixy],
-            [this.IO.totpixx, 1],
-            [1, 1],
-            [1, this.IO.totpixy]];
+        var pix_of_corners = [[this.IO.totpixx, 1],
+            [this.IO.totpixx, this.IO.totpixy],
+            [1, this.IO.totpixy],
+            [1, 1]];
 
-        var azel_of_corners = Array(4);
+        var el_of_corners = Array(4);
 
         var i;
         for(i=0;i<4;i++){
-            azel_of_corners[i] = this.calcAzEl(pix_of_corners[i][0],pix_of_corners[i][1]);
+            el_of_corners[i] = this.calcEl(pix_of_corners[i][0],pix_of_corners[i][1]);
         }
 
-        var cornerpixraw = Array(8);
-        var cornerpixfinal = Array(8);
+        var pixellist = Array();
         for(i=0;i<4;i++){
-            var val = [1, azel_of_corners[i][0], azel_of_corners[i][1], pix_of_corners[i][0],pix_of_corners[i][1]];
-            cornerpixraw[2*i] = val;
-            cornerpixraw[2*i+1] = [0, 0, 0, 0, 0];
-            cornerpixfinal[2*i] = val;
-            cornerpixfinal[2*i+1] = [0, 0, 0, 0, 0];
-        }
-
-        for(i=0;i<7;i+=2){
             var i1 = i;
-            var i2 = i+2;
-            if(i2>7) {
-                i2 = 0;
-            }
-            var az1 = cornerpixraw[i1][1];
-            var el1 = cornerpixraw[i1][2];
-            var az2 = cornerpixraw[i2][1];
-            var el2 = cornerpixraw[i2][2];
-
-            var T = (horizonangle-el1)/(el2-el1);
-            if(T>0 && T<1)
-            {
-                console.log('Break Between: ' + i.toString() + ' - ' + (i+2).toString())
-                if (el1 > el2){
-                    cornerpixfinal[i1]=[0, 0, 0, 0, 0];
-                }
-                else {
-                    cornerpixfinal[i2]=[0, 0, 0, 0, 0];
-                }
-                var x1 = cornerpixraw[i1][3];
-                var y1 = cornerpixraw[i1][4];
-                var x2 = cornerpixraw[i2][3];
-                var y2 = cornerpixraw[i2][4];
-
-                var seg_xpix = x1 + (x2 - x1) * T;
-                var seg_ypix = y1 + (y2 - y1) * T;
-                var seg_az = az1 + (az2 - az1) * T;
-                var seg_el = el1 + (el2 - el1) * T;
-                cornerpixfinal[i1+1] = [1, seg_az, seg_el, seg_xpix, seg_ypix];
-            }
-        }
-        console.log(cornerpixraw);
-        console.log(cornerpixfinal);
-
-        var goodpixels = Array();
-        for(i=0;i<8;i++){
-            if (cornerpixfinal[i][0]==1 && cornerpixfinal[i][2]<=horizonangle) {
-                var goodpixelcoords = [cornerpixfinal[i][3], cornerpixfinal[i][4]];
-                goodpixels.push(goodpixelcoords);
-            }
+            var i2 = i+1;if (i2==4){i2=0;}
+            pixellist = this.calcSegmentInterp(pix_of_corners[i],pix_of_corners[i2],el_of_corners[i1],el_of_corners[i2],horizonangle,pixellist);
         }
 
-
-        var goodpixels = [[this.IO.totpixx, 1],
-                      [this.IO.totpixx, this.IO.totpixy],
-                      [1, this.IO.totpixy],
-                      [1, 1]];
-
-        return goodpixels;
+        return pixellist;
     }
 
     calcfootprint() {
@@ -354,7 +342,6 @@ class Camera {
         var LLcorners = Array();
         for(i=0;i<footprintpixels.length;i++){
             var Putm = uv2xyconstz(footprintpixels[i][0],footprintpixels[i][1],this.P);
-            console.log(Putm);
             LLcorners.push(calcUTM2LL(Putm[0],Putm[1],zone,band));
         }
 
