@@ -5,8 +5,8 @@
     font-size: 40px;
 }
 .target {
-    color: black;
-    text-align: center; /* Horizontally center the text (icon) */
-    line-height: 40px; /* Vertically center the text (icon) */
-    font-size: 40px;
-}
+     color: black;
+     text-align: center; /* Horizontally center the text (icon) */
+     line-height: 40px; /* Vertically center the text (icon) */
+     font-size: 40px;
+ }
