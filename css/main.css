@@ -1,0 +1,30 @@
+#wrapper {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    position: relative;
+}
+
+#A, #B {
+    position: absolute;
+}
+#A {
+    top: 60px;
+    width: 200px;
+    bottom: 0;
+    background:orange;
+}
+#B {
+    top: 60px;
+    left: 200px;
+    right: 0;
+    bottom: 0;
+    background:green;
+}
+#closeSettings {
+    position: absolute;
+    background: red;
+    color: white;
+    top: 0;
+    right: 0;
+}

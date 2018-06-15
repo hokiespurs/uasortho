@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UAS Ortho</title>
+    <link rel="stylesheet" href="libs/bootstrap-4.1.1-dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="wrapper">
+    <!-- BOOTSTRAP HEADER -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light py-0" style="z-index:100;">
+        <img src="img/logo.png"  height="50px" class="d-inline-block align-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a id="navbtnSettings" class="nav-item nav-link active" href="#">Settings <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="#">Tools</a>
+                <a class="nav-item nav-link" href="#">About</a>
+                <a class="nav-item nav-link disabled" href="#">Help</a>
+            </div>
+        </div>
+
+    </nav>
+    <!-- Sidebar -->
+    <div id="A">
+        <button id = "closeSettings"><</button>
+    </div>
+
+    <!-- Page Content -->
+    <div id="B">
+
+    </div>
+
+</div>
+
+
+<!-- add js libraries -->
+<script src="libs/jquery-3.1.1/jquery.js"></script>
+<script src="libs/bootstrap-4.1.1-dist/js/bootstrap.js"></script>
+<script src="libs/leaflet/leaflet.js"></script>
+<script src="libs/leafletUTM/L.LatLng.UTM.js"></script>
+<script src="libs/popper/popper.js"></script>
+<script src="js/sidebar.js"></script>
+</body>
+</html>
