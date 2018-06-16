@@ -255,6 +255,7 @@ class Camera {
 
         this.EO.setPitch = rho_phi_theta[2];
         this.EO.setYaw = -rho_phi_theta[1];
+        this.EO.setRoll = 0;
 
         this.updateAll();
     }
@@ -331,6 +332,8 @@ class Camera {
 
         return pixellist;
     }
+
+
 
     calcfootprint() {
         var band = this.EO.band;
@@ -417,6 +420,7 @@ class Camera {
         this.updateFootprintPolygon();
         this.updateCameraHorizonView();
         this.updateGsdResolutionPolygons();
+        updateSettings();
     }
 }
 

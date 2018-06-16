@@ -6,18 +6,22 @@
     <link rel="stylesheet" href="libs/bootstrap-4.1.1-dist/css/bootstrap.css"/>
     <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
     <link rel="stylesheet" href="css/main.css"/>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="wrapper">
     <!-- BOOTSTRAP HEADER -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light py-0" style="z-index:100;">
         <img src="img/logo.png"  height="50px" class="d-inline-block align-top">
+        <div class="d-flex justify-content-left nav-item">
+            <span class="navbar-text"><h2> &nbsp;UAS Ortho &nbsp;&nbsp;&nbsp;&nbsp;</h2></span>
+        </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a id="navbtnSettings" class="nav-item nav-link active" href="#">Settings <span class="sr-only">(current)</span></a>
+                <a id="navbtnSettings" class="nav-item nav-link" href="#">Settings <span class="sr-only">(current)</span></a>
                 <a class="nav-item nav-link" href="#">Tools</a>
                 <a class="nav-item nav-link" href="#">About</a>
                 <a class="nav-item nav-link disabled" href="#">Help</a>
@@ -26,17 +30,182 @@
 
     </nav>
     <!-- Sidebar -->
-    <div id="A">
-        <button id = "closeSettings"><</button>
-    </div>
+    <div id="sidebar">
+        <!-- IO Parameters -->
+        <button class="accordion">Interior Orientation</button>
+        <div id="IOgroup" class="panel">
 
+            <div class="form-group row">
+                <label for="camselect" class="col-4 col-form-label">Camera </label>
+                <div class="col-8">
+                    <select class="form-control eoio" id="camselect" name="selectcamera">
+                        <option value="A">Camera A</option>
+                        <option value="B">Camera B</option>
+                        <option value="C">Camera C</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputFocal" class="col-6 col-form-label">Focal (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="4000" min="0" id="inputFocal">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputHorizontalPixels" class="col-6 col-form-label">Width (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="4000" min="0" id="inputHorizontalPixels">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputVerticalPixels" class="col-6 col-form-label">Height (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="3000" min="0" id="inputVerticalPixels" >
+                </div>
+            </div>
+        </div>
+        <!-- EO Parameters -->
+        <button class="accordion">Exterior Orientation</button>
+        <div id="EOgroup" class="panel">
+            <div class="form-group row">
+                <label for="inputRoll" class="col-6 col-form-label">Roll</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="0" min="0" id="inputRoll">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputPitch" class="col-6 col-form-label">Pitch</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="40" min="0" id="inputPitch">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputYaw" class="col-6 col-form-label">Yaw</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="100" min="-360" max="360" id="inputYaw">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputAlt" class="col-6 col-form-label">Altitude (m)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="100" min="0" id="inputAlt">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputLon" class="col-4 col-form-label">Longitude</label>
+                <div class="col-8">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="-123.27888" min="-180" max="180" id="inputLon">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputLat" class="col-4 col-form-label">Latitude</label>
+                <div class="col-8">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="44.56576" min="0" max="90" id="inputLat">
+                </div>
+            </div>
+        </div>
+        44.56576, -123.27888
+        <!-- Projection -->
+        <button class="accordion">Projection</button>
+        <div id="ProjectionGroup" class="panel">
+             <div class="form-group row">
+                <label for="projcoord" class="col-4 col-form-label">Name</label>
+                <div class="col-8">
+                    <select class="form-control" id="projcoord" name="Projection">
+                        <option value="A">Projection A</option>
+                        <option value="B">Projection B</option>
+                        <option value="C">Projection C</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="projnameinputline" class="form-group row">
+                <label for="projName" class="col-4 col-form-label">Name</label>
+                <div class="col-8">
+                    <input class="form-control" type="text" value="FRF Coords" min="0" id="projName">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="projString" class="col-4 col-form-label">
+                    str
+                    <button id="projstrquestion">?</button>
+                </label>
+                <div class="col-8">
+                    <input class="form-control" type="text" value="aa" min="0" id="projString">
+                </div>
+            </div>
+        </div>
+        <!-- Appearance -->
+        <button class="accordion">Appearance</button>
+        <div id="appearanceGroup" class="panel">
+
+            <div class="form-group row">
+                <div class="col-2">
+                    <input class="form-control" type="checkbox" value="aa" min="0" id="toggleLegend">
+                </div>
+                <label for="toggleLegend" class="col-10 col-form-label">Show Legend</label>
+            </div>
+        </div>
+
+        <!-- Colorbar -->
+        <button class="accordion">Colorbar</button>
+        <div id="colorbarGroup" class="panel">
+
+            <div class="form-group row">
+                <label for="selectscalar" class="col-4 col-form-label">Scalar</label>
+                <div class="col-8">
+                    <select class="form-control" id="selectscalar" name="Scalar">
+                        <option value="A">None</option>
+                        <option value="B">GSD</option>
+                        <option value="C">GSD Ratio</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputCmin" class="col-6 col-form-label">Minimum</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="0" min="0" id="inputCmin">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputCmax" class="col-6 col-form-label">Maximum</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="20" min="0" id="inputCmax">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
     <!-- Page Content -->
-    <div id="B">
+    <div id="content">
+        <div id="settingsbtndiv">
+            <button id="settingsbtn" onclick="toggleSettings()"> O </button>
+        </div>
+
+        <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fa fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
+
+        <div id="coordinateBox">
+            <a>Coordinate System: <a id="coordboxCoordSysText">WGS84</a> </a><br>
+            <a>Camera : <a id="coordboxCamText">X: 1000 Y:2000</a></a><br>
+            <a>Look-at: <a id="coordboxLookatText">foo</a></a><br>
+            <a>Cursor : <a id="coordboxCursorText">foo</a></a><br>
+            <a>AGL : <a id="coordboxAGLText">100m</a></a><br>
+        </div>
+
+        <div id="pixelBox">
+            blah blah blah
+        </div>
+
+        <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0px; left: 0;"></div>
 
     </div>
-
 </div>
-
 
 <!-- add js libraries -->
 <script src="libs/jquery-3.1.1/jquery.js"></script>
@@ -44,6 +213,72 @@
 <script src="libs/leaflet/leaflet.js"></script>
 <script src="libs/leafletUTM/L.LatLng.UTM.js"></script>
 <script src="libs/popper/popper.js"></script>
+<script src="libs/math/math.min.js"></script>
+<script src="libs/proj4js-2.4.3/dist/proj4.js"></script>
 <script src="js/sidebar.js"></script>
+<script src="js/photogrammetry.js"></script>
+<script src="js/myleafletmap.js"></script>
+<script>
+    // GLOBALS
+    var pixx = 4000,
+        pixy = 3000,
+        f    = 4000,
+        campos = {x: 100, y:100, z:100},
+        lookatpos = {x: 100, y:100, z:100},
+        cursorpos = {x: 100, y:100, z:100},
+        camorientation = {roll: 0, pitch: 40, yaw: 100};
+
+    var showPixelBox = true,
+        showCoords = true;
+
+    // Update Functions
+    $('.eoio').on("change",updateMap);
+    $('.eoio').on("click",updateMap);
+
+    updateSettings();
+    //$('#pixelBox').hidden = true;
+
+    function updateMap(){
+        myCamera.IO.cx = $('#inputHorizontalPixels').val()/2;
+        myCamera.IO.cy = $('#inputVerticalPixels').val()/2;
+        myCamera.IO.f = $('#inputFocal').val();
+        myCamera.IO.totpixx = myCamera.IO.cx*2;
+        myCamera.IO.totpixy = myCamera.IO.cy*2;
+        myCamera.IO.recalc();
+
+        myCamera.EO.roll = $('#inputRoll').val() * Math.PI/180;
+        myCamera.EO.pitch = $('#inputPitch').val() * Math.PI/180;
+        myCamera.EO.yaw = $('#inputYaw').val() * Math.PI/180;
+
+        myCamera.EO.lat = $('#inputLat').val();
+        myCamera.EO.lng = $('#inputLon').val();
+        myCamera.EO.Zc = $('#inputAlt').val();
+
+        myCamera.EO.calcUTM();
+        myCamera.EO.calcRT();
+
+        myCamera.updateAll();
+
+        updateSettings();
+    }
+    function updateSettings(){
+        $('#inputHorizontalPixels').val(myCamera.IO.cx*2);
+        $('#inputVerticalPixels').val(myCamera.IO.cy*2);
+        $('#inputFocal').val(myCamera.IO.f);
+
+        $('#inputRoll').val(Math.round(myCamera.EO.roll * 180/ Math.PI*100)/100);
+        $('#inputPitch').val(Math.round(myCamera.EO.pitch * 180/Math.PI*100)/100);
+        $('#inputYaw').val(Math.round(myCamera.EO.yaw * 180/ Math.PI*100)/100);
+
+        $('#inputLat').val(Math.round(myCamera.EO.lat * 100000)/100000);
+        $('#inputLon').val(Math.round(myCamera.EO.lng * 100000)/100000);
+        $('#inputAlt').val(myCamera.EO.Zc);
+
+    }
+
+
+
+</script>
+
 </body>
 </html>

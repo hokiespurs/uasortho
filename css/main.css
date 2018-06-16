@@ -5,26 +5,108 @@
     position: relative;
 }
 
-#A, #B {
+#sidebar, #content {
     position: absolute;
 }
-#A {
+#sidebar {
     top: 60px;
-    width: 200px;
+    width: 300px;
     bottom: 0;
-    background:orange;
+    overflow: scroll;
+    z-index: 1198;
 }
-#B {
+#content {
     top: 60px;
-    left: 200px;
+    left: 300px;
     right: 0;
     bottom: 0;
-    background:green;
+    z-index: 1199;
 }
-#closeSettings {
-    position: absolute;
-    background: red;
-    color: white;
-    top: 0;
-    right: 0;
+
+#settingsbtndiv{
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 1200;
+}
+
+#coordinateBox{
+    position:absolute;
+    left:5px;
+    bottom:5px;
+    z-index:10000;
+    background-color:rgba(255,255,255,0.5);
+}
+
+#pixelBox{
+    position:absolute;
+    right:5px;
+    bottom:30px;
+    width:300px;
+    height:300px;
+    z-index:1205;
+    background-color: rgba(8, 26, 255, 1);
+}
+
+#colorbar{
+    position:absolute;
+    left:5px;
+    bottom:5px;
+    z-index:10000;
+    background-color:rgba(255,255,255,0.5);
+}
+
+
+#attribution{
+    position:absolute;
+    bottom:0px;
+    right:0px;
+    height: 27px;
+    z-index:10000;
+    background-color:rgba(255,255,255,0.5);
+}
+
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+    font-weight: bolder;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+    background-color: #ccc;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+    padding: 5px 18px;
+    background-color: white;
+    display: block;
+    overflow: hidden;
+}
+
+
+.attr{
+    color: black !important;
+}
+
+.camera {
+    color: black;
+    text-align: center; /* Horizontally center the text (icon) */
+    line-height: 40px; /* Vertically center the text (icon) */
+    font-size: 40px;
+}
+.target {
+    color: black;
+    text-align: center; /* Horizontally center the text (icon) */
+    line-height: 40px; /* Vertically center the text (icon) */
+    font-size: 40px;
 }
