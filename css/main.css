@@ -24,9 +24,11 @@
 }
 
 #settingsbtndiv{
-    position: relative;
+    position: absolute;
     top: 10px;
     left: 10px;
+    width: 30px;
+    height: 30px;
     z-index: 1200;
 }
 
@@ -47,15 +49,6 @@
     z-index:1205;
     background-color: rgba(8, 26, 255, 1);
 }
-
-#colorbar{
-    position:absolute;
-    left:5px;
-    bottom:5px;
-    z-index:10000;
-    background-color:rgba(255,255,255,0.5);
-}
-
 
 #attribution{
     position:absolute;
@@ -101,12 +94,12 @@
 .camera {
     color: black;
     text-align: center; /* Horizontally center the text (icon) */
-    line-height: 40px; /* Vertically center the text (icon) */
-    font-size: 40px;
+    line-height: 20px; /* Vertically center the text (icon) */
+    font-size: 20px;
 }
 .target {
     color: black;
     text-align: center; /* Horizontally center the text (icon) */
-    line-height: 40px; /* Vertically center the text (icon) */
-    font-size: 40px;
+    line-height: 20px; /* Vertically center the text (icon) */
+    font-size: 20px;
 }

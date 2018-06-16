@@ -183,8 +183,8 @@ class Camera {
         this.uasmarker=new L.marker(this.EO.getLatLng, {
             draggable: true,
             icon: L.divIcon({
-                html: '<i class="fa fa-camera-retro"></i>',
-                iconSize: [40, 40],
+                html: '<i class="fa fa-circle"></i>',
+                iconSize: [20, 20],
                 className: 'camera'
             })
         });
@@ -194,7 +194,7 @@ class Camera {
             draggable: true,
             icon: L.divIcon({
                 html: '<i class="fa fa-bullseye"></i>',
-                iconSize: [40, 40],
+                iconSize: [20, 20],
                 className: 'target'
             })
         });
@@ -304,7 +304,7 @@ class Camera {
     calcCornerPixHorizonTrim() {
         // determine angle to not go over
 
-        var MAX_D = 15000;
+        var MAX_D = 10000;
         var horizonangle = Math.atan(MAX_D/this.EO.Zc);
         // [ 4       1 ]
         // |           | Pixel corners in this order

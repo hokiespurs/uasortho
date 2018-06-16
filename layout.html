@@ -38,11 +38,7 @@
             <div class="form-group row">
                 <label for="camselect" class="col-4 col-form-label">Camera </label>
                 <div class="col-8">
-                    <select class="form-control eoio" id="camselect" name="selectcamera">
-                        <option value="A">Camera A</option>
-                        <option value="B">Camera B</option>
-                        <option value="C">Camera C</option>
-                    </select>
+                    <select class="form-control eoio" id="camselect" name="selectcamera"></select>
                 </div>
             </div>
 
@@ -107,7 +103,6 @@
                 </div>
             </div>
         </div>
-        44.56576, -123.27888
         <!-- Projection -->
         <button class="accordion">Projection</button>
         <div id="ProjectionGroup" class="panel">
@@ -185,7 +180,7 @@
     <!-- Page Content -->
     <div id="content">
         <div id="settingsbtndiv">
-            <button id="settingsbtn" onclick="toggleSettings()"> O </button>
+            <button id="settingsbtn" onclick="toggleSettings()"> <span class="fa fa-cog fa-2x"></span> </button>
         </div>
 
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fa fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
@@ -218,6 +213,10 @@
 <script src="js/sidebar.js"></script>
 <script src="js/photogrammetry.js"></script>
 <script src="js/myleafletmap.js"></script>
+<script src="assets/cameras.js"></script>
+<script src="assets/locations.js"></script>
+<script src="assets/projections.js"></script>
+
 <script>
     // GLOBALS
     var pixx = 4000,
@@ -235,7 +234,38 @@
     $('.eoio').on("change",updateMap);
     $('.eoio').on("click",updateMap);
 
+    // DO ONCE
     updateSettings();
+
+    var i;
+    var camselect = $('#camselect');
+    for(i=0;i<cameras.length;i++){
+        camselect.append('<option value="' + i.toString() + '">' + cameras[i].name + '</option>');
+    }
+    camselect.append('<option value="' + i.toString() + '">Custom</option>');
+    ncams = cameras.length;
+    populateCameras();
+
+    camselect.on("change",populateCameras);
+    function populateCameras(){
+        var currentval = camselect.val();
+        if (parseFloat(currentval) !== ncams){
+            $('#inputFocal').prop('readOnly',true);
+            $('#inputHorizontalPixels').prop('readOnly',true);
+            $('#inputVerticalPixels').prop('readOnly',true);
+
+            $('#inputFocal').val(cameras[currentval].f);
+            $('#inputHorizontalPixels').val(cameras[currentval].pixx);
+            $('#inputVerticalPixels').val(cameras[currentval].pixy);
+        }
+        else {
+            $('#inputFocal').prop('readOnly',false);
+            $('#inputHorizontalPixels').prop('readOnly',false);
+            $('#inputVerticalPixels').prop('readOnly',false);
+        }
+
+    }
+
     //$('#pixelBox').hidden = true;
 
     function updateMap(){
@@ -274,9 +304,17 @@
         $('#inputLon').val(Math.round(myCamera.EO.lng * 100000)/100000);
         $('#inputAlt').val(myCamera.EO.Zc);
 
+        // Get Marker Coords
+
+        // Get Look At Coords
+
     }
 
-
+    function updatecursorpos(){
+        var str='';
+        str = "Lon: " + cursor.lon.toString() + " Lat: " + cursor.lat.toString();
+        $('#coordboxCursorText').text(str);
+    }
 
 </script>
 
