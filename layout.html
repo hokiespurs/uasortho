@@ -9,6 +9,8 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
+
+
 <div class="wrapper">
     <!-- BOOTSTRAP HEADER -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light py-0" style="z-index:100;">
@@ -22,8 +24,8 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a id="navbtnSettings" class="nav-item nav-link" href="#">Settings <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" href="#">Tools</a>
-                <a class="nav-item nav-link" href="#">About</a>
+                <a class="nav-item nav-link disabled" href="#">Tools</a>
+                <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#infomodal">About</a>
                 <a class="nav-item nav-link disabled" href="#">Help</a>
             </div>
         </div>
@@ -220,8 +222,54 @@
             blah blah blah
         </div>
 
-        <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0px; left: 0;"></div>
+        <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
 
+    </div>
+    <!-- Info Modal -->
+    <div class="modal fade" id="infomodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-success">
+                    <h4 class="modal-title">Information</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Project</h5>
+                    <p>
+                        This project depicts the footprint of an orthophoto taken from an aerial camera, which can be utilized to do mission planning with UAS.
+                        The photogrammetric equations use a pinhole camera, with the assumption that altitude is the height above a flat plane with no curvature.
+                        <br>
+                        <i class="fa fa-github hyp"></i> <a class="hyp" href="https://github.com/hokiespurs/uasortho">More information</a>.
+                    </p>
+                    <hr>
+                    <h5>Attribution</h5>
+                    <ul>
+                        <li>The map is based on <a class="hyp" href="https://leafletjs.com/">leaflet</a></li>
+                        <li>The layout utilizes <a class="hyp" href="https://getbootstrap.com/">Bootstrap</a></li>
+                        <li>Coordinate conversions are handled with <a class="hyp" href="http://proj4js.org/">proj4js</a></li>
+                    </ul>
+                    <hr>
+                    <h5>Author</h5>
+                    <div style="display:flex">
+                        <div style="width:150px">
+                            <img width="100%" src="img/profkayak_circle.jpg">
+                        </div>
+                        <div style="flex: 1;padding-left: 30px;">
+                            <h6>Richie Slocum</h6>
+                            <hr>
+                            <p> PhD Student, Oregon State University
+                                <br>
+                                Civil Engineering - Geomatics
+                                <br>
+                                <a class="hyp" href="mailto:slocumr@oregonstate.edu">slocumr@oregonstate.edu</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

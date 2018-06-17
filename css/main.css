@@ -13,30 +13,48 @@
     width: 300px;
     bottom: 0;
     overflow: scroll;
-    z-index: 1198;
+    z-index: 1;
 }
 #content {
     top: 60px;
     left: 300px;
     right: 0;
     bottom: 0;
-    z-index: 1199;
+    z-index: 2;
 }
-
+#mapid {
+    z-index: 2
+}
+#wrapper {
+    z-index:1
+}
 #settingsbtndiv{
     position: absolute;
     top: 10px;
     left: 10px;
     width: 30px;
     height: 30px;
-    z-index: 1200;
+    z-index: 3;
+}
+.modal-header-success {
+    color:#fff;
+    padding:9px 15px;
+    border-bottom:1px solid #eee;
+    background-color: #5bc0de;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    z-index: 4;
 }
 
 #coordinateBox{
     position:absolute;
     left:5px;
     bottom:5px;
-    z-index:10000;
+    z-index:3;
     background-color:rgba(255,255,255,0.75);
 }
 
@@ -46,7 +64,7 @@
     bottom:30px;
     width:300px;
     height:300px;
-    z-index:1205;
+    z-index:3;
     background-color: rgba(8, 26, 255, 1);
 }
 
@@ -55,7 +73,7 @@
     bottom:0px;
     right:0px;
     height: 27px;
-    z-index:10000;
+    z-index:3;
     background-color:rgba(255,255,255,0.75);
 }
 
@@ -64,7 +82,7 @@
     background-color: #eee;
     color: #444;
     cursor: pointer;
-    padding: 18px;
+    padding: 15px;
     width: 100%;
     text-align: left;
     border: none;
@@ -118,3 +136,7 @@ input[type=color].form-control {
     padding: 0;
     height: 40px
  }
+
+.hyp{
+    color: darkblue !important;
+}
