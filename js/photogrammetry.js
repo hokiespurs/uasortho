@@ -1,205 +1,491 @@
 class IO {
-    constructor(f,totpixx,totpixy) {
+    constructor(f,totpixx,totpixy, name) {
         this.f = f;
         this.cx = totpixx/2;
         this.cy = totpixy/2;
         this.totpixx = totpixx;
         this.totpixy = totpixy;
+        this.name = name;
+        this.recalc();
+    }
+    recalc() {
+        this.K = [[this.f,0,this.cx],[0,this.f,this.cy],[0,0,1]];
+        this.ifov = Math.atan2(1,this.f);
+        this.vfov = this.ifov * this.totpixy;
+        this.hfov = this.ifov * this.totpixx;
+    }
+    // SETTERS
+    set setf(x) {
+        this.f = x;
+        this.recalc();
+    }
+    set setcx(x) {
+        this.cx = x;
+        this.recalc();
+    }
+    set setcy(x) {
+        this.cy = x;
+        this.recalc();
+    }
+    set settotpixx(x) {
+        this.totpixx = x;
+        this.recalc();
+    }
+    set settotpixy(x) {
+        this.totpixy = x;
+        this.recalc();
     }
 }
+
 class EO {
-    constructor(lat,lon,alt,roll,pitch,yaw) {
-        this.lat    = lat;
-        this.lon    = lon;
-        this.Zc     = alt;
+    constructor(lat,lng,Zc,roll,pitch,yaw) {
+        this.lat     = lat;
+        this.lng     = lng;
+        this.Zc     = Zc;
         this.calcUTM();
         this.roll   = roll;
         this.pitch  = pitch;
         this.yaw    = yaw;
+        this.calcRT();
+        this.projstr = '';
     }
     calcUTM(){
-        this.Xc     = L.latLng(this.lat, this.lon).utm().x;
-        this.Yc     = L.latLng(this.lat, this.lon).utm().y;
-        this.zone   = L.latLng(this.lat, this.lon).utm().zone;
-        this.band   = L.latLng(this.lat, this.lon).utm().band;
+        this.Xc     = L.latLng(this.lat, this.lng).utm().x;
+        this.Yc     = L.latLng(this.lat, this.lng).utm().y;
+        this.zone   = L.latLng(this.lat, this.lng).utm().zone;
+        this.band   = L.latLng(this.lat, this.lng).utm().band;
+    }
+    calcLL(){
+        var ll = calcUTM2LL(this.Xc, this.Yc, this.zone, this.band);
+        this.lat = ll.lat;
+        this.lng = ll.lng;
+    }
+    calcRT(){
+        var Rx = 0;
+        var Ry = 0;
+        var Rz = 0;
+        var T = 0;
+        this.RT = 0;
+    }
+
+    // SETTERS
+    set setXc(x){
+        this.Xc = x;
+        this.calcLL();
+        this.calcRT();
+    }
+    set setYc(x){
+        this.Yc = x;
+        this.calcLL();
+        this.calcRT();
+    }
+    set setZc(x){
+        this.Zc = x;
+        this.calcRT();
+    }
+    set setXcYc(xy){
+        this.Xc = xy[0];
+        this.Yc = xy[1];
+        this.calcLL();
+        this.calcRT();
+    }
+    set setXcYcZc(xyz){
+        this.Xc = xyz[0];
+        this.Yc = xyz[1];
+        this.Yc = xyz[2];
+        this.calcLL();
+        this.calcRT();
+    }
+    set setLat(x){
+        this.lat = x;
+        this.calcUTM();
+        this.calcRT();
+    }
+    set setUTMBandZone(bz){
+        this.band = bz[0];
+        this.zone = bz[1];
+        this.calcLL();
+    }
+    set setLng(x){
+        this.lng = x;
+        this.calcUTM();
+        this.calcRT();
+    }
+    set setLatLng(ll){
+        this.lat = ll[0];
+        this.lng = ll[1];
+        this.calcUTM();
+        this.calcRT();
+    }
+    set setRoll(x){
+        this.roll = x;
+        this.calcRT();
+    }
+    set setRollDeg(x){
+        this.roll = deg2rad(x);
+        this.calcRT();
+    }
+    set setPitch(x){
+        this.pitch = x;
+        this.calcRT();
+    }
+    set setPitchDeg(x){
+        this.pitch = deg2rad(x);
+        this.calcRT();
+    }
+    set setYaw(x){
+        this.yaw = x;
+        this.calcRT();
+    }
+    set setYawDeg(x){
+        this.yaw = deg2rad(x);
+        this.calcRT();
+    }
+    set setRollPitchYaw(rpy){
+        this.roll  = rpy[0];
+        this.pitch = rpy[1];
+        this.yaw   = rpy[2];
+        this.calcRT();
+    }
+    set setRollPitchYawDeg(rpy){
+        this.roll  = deg2rad(rpy[0]);
+        this.pitch = deg2rad(rpy[1]);
+        this.yaw   = deg2rad(rpy[2]);
+        this.calcRT();
+    }
+
+    // GETTERS
+    get getXYZ(){
+        return [this.Xc, this.Yc, this.Zc, this.zone, this.band];
+    }
+    get getLatLng(){
+        return [this.lat, this.lng];
+    }
+    get getRollPitchYaw(){
+        return [this.roll, this.pitch, this.yaw];
+    }
+    get getRollPitchDeg(){
+        return [rad2deg(this.roll), rad2deg(this.pitch), rad2deg(this.yaw)];
     }
 }
+
 class Camera {
-    constructor(iIO, iEO) {
-        this.IO = iIO;
-        this.EO = iEO;
+    constructor(myIO, myEO) {
+        this.IO = myIO;
+        this.EO = myEO;
 
-        this.centerpoint = this.calcCenterPoint();
-        this.footprint = this.calcfootprint();
+        this.calcP();
+        this.calccenterpoint();
+        this.calcfootprint();
+        this.gsdPixelResolution = 0;
 
-        this.uasmarker = new L.Marker([iEO.lat, iEO.lon],{icon: uasicon, draggable: true});
-        this.uasmarker.on("drag",this.updateEO,this);
 
-        this.centermarker = new L.Marker(this.centerpoint,{icon: crosshairicon, draggable: true});
-        this.centermarker.on("drag",this.updateEOPitchYaw,this);
-
-        this.footprintpolygon = new L.Polygon(this.footprint,{
-            color: 'orange',
-            weight: 5
+        this.uasmarker=new L.marker(this.EO.getLatLng, {
+            draggable: true,
+            icon: L.divIcon({
+                html: '<i class="fa fa-circle"></i>',
+                iconSize: [20, 20],
+                className: 'camera'
+            })
         });
+        this.uasmarker.on("drag",this.uasmarkermoved,this);
+
+        this.centermarker=new L.marker(this.centerpoint, {
+            draggable: true,
+            icon: L.divIcon({
+                html: '<i class="fa fa-plus"></i>',
+                iconSize: [20, 20],
+                className: 'target'
+            })
+        });
+        this.centermarker.on("drag",this.uastargetmoved,this);
+
+        this.footprintpolygon=new L.Polygon(this.footprint,{color:'#5cb85c', weight: 5});
+
+        //this.gsdResolutionPolygons=0;
+        //this.cameraHorizonView=0;
+
+    }
+    //SETTER
+    set setXYZ(xyz){
+        this.EO.setXcYcZc(xyz);
     }
 
-    // redrawfootprint
-    // redrawmarker
-
-    updateEO(){
-        this.EO.lat = this.uasmarker.getLatLng().lat;
-        this.EO.lon = this.uasmarker.getLatLng().lng;
-        this.EO.calcUTM();
-        this.redraw();
+    set setLL(latlng){
+        this.EO.setLatLng = latlng;
+        this.updateAll();
     }
-    updateEOPitchYaw() {
+
+    set setRPYdeg(rpy){
+        this.EO.setRollPitchYawDeg = rpy;
+        this.updateAll();
+    }
+
+    set setIO(val){
+        this.IO.setf = val[0];
+        this.IO.settotpixx = val[1];
+        this.IO.settotpixy = val[2];
+    }
+
+    //GETTER
+    get getXYZ(){
+        return this.EO.getXYZ;
+    }
+
+    get getLL(){
+        return this.EO.getLatLng;
+    }
+
+    get getRPYdeg(){
+        return this.EO.getRollPitchDeg;
+    }
+
+    // MANUAL MARKER MOVEMENT FUNCTIONS
+    uasmarkermoved() {
+        // for moved marker
+        this.setLL = [this.uasmarker.getLatLng().lat, this.uasmarker.getLatLng().lng];
+    }
+
+    uastargetmoved() {
         var x = this.EO.Xc - this.centermarker.getLatLng().utm().x;
         var y = this.EO.Yc - this.centermarker.getLatLng().utm().y;
         var z = this.EO.Zc - 0;
 
-        var rho = Math.sqrt(x**2 + y**2 + z**2);
-        var phi = Math.atan2(y, x) + Math.PI/2;
-        var theta = Math.acos(z/rho);
+        var rho_phi_theta = cart2sph(x,y,z);
 
-        this.EO.roll = theta + Math.PI;
-        this.EO.yaw = phi;
-        updateInputFields();
-        this.redraw();
+        this.EO.setPitch = rho_phi_theta[2];
+        this.EO.setYaw = -rho_phi_theta[1];
+        this.EO.setRoll = 0;
 
+        this.updateAll();
     }
-    // Methods
-    addtomap(mapname) {
+    calcEl(pixx,pixy){
+        var fullP = this.P.slice(0);
+        var iP = math.inv([[fullP[0][0], fullP[0][1], fullP[0][2]],
+                           [fullP[1][0], fullP[1][1], fullP[1][2]],
+                           [fullP[2][0], fullP[2][1], fullP[2][2]]]);
+        var uvs1 = [pixx,pixy,1];
+        var xyz1 = math.multiply(iP,uvs1);
+
+        var r = Math.sqrt((xyz1[0])**2+(xyz1[1])**2);
+        var el = Math.PI/2 + Math.atan2(xyz1[2],r);
+
+        return el;
+    }
+    calcSegmentInterp(pix1, pix2, el1, el2, horizonangle, pixellist){
+        // TODO FIX THIS CLUNKY CODE
+
+        // Null Case: both points are above the horizon angle
+        if (el1>=horizonangle && el2>=horizonangle){return pixellist;}
+
+        // If first below horizon, push that point to pixellist
+        if (el1<horizonangle){
+            pixellist.push(pix1);
+            if (el2<horizonangle) {return pixellist;}
+        }
+
+        // Interpolate along segment
+         // find whether xpix or ypix are varying
+        var xvarying = false;
+        if (pix1[1]==pix2[1]){xvarying=true;}
+        // interpolate
+        var T = (horizonangle-el1)/(el2-el1);
+        if (xvarying){
+            var ypix = pix1[1];
+            var xpix = pix1[0] + (pix2[0] - pix1[0]) * T;
+        }
+        else {
+            var xpix = pix1[0];
+            var ypix = pix1[1] + (pix2[1] - pix1[1]) * T;
+        }
+        if (this.calcEl(xpix,ypix)>horizonangle){
+            el2 = this.calcEl(xpix,ypix);
+            pix2 = [xpix, ypix];
+            T = (horizonangle-el1)/(el2-el1);
+            if (xvarying){
+                ypix = pix1[1];
+                xpix = pix1[0] + (pix2[0] - pix1[0]) * T;
+            }
+            else {
+                xpix = pix1[0];
+                ypix = pix1[1] + (pix2[1] - pix1[1]) * T;
+            }
+        }
+        pixellist.push([xpix, ypix]);
+
+        return pixellist;
+    }
+    // CALC FUNCTIONS
+    calcCornerPixHorizonTrim() {
+        // determine angle to not go over
+
+        let horizonangle = 89*Math.PI/180;
+        // [ 4       1 ]
+        // |           | Pixel corners in this order
+        // |           |
+        // [ 3       2 ]
+
+        var pix_of_corners = [[this.IO.totpixx, 1],
+            [this.IO.totpixx, this.IO.totpixy],
+            [1, this.IO.totpixy],
+            [1, 1]];
+
+        var el_of_corners = Array(4);
+
+        var i;
+        for(i=0;i<4;i++){
+            el_of_corners[i] = this.calcEl(pix_of_corners[i][0],pix_of_corners[i][1]);
+        }
+
+        var pixellist = Array();
+        for(i=0;i<4;i++){
+            var i1 = i;
+            var i2 = i+1;if (i2==4){i2=0;}
+            pixellist = this.calcSegmentInterp(pix_of_corners[i],pix_of_corners[i2],el_of_corners[i1],el_of_corners[i2],horizonangle,pixellist);
+        }
+
+        return pixellist;
+    }
+
+
+
+    calcfootprint() {
+        var band = this.EO.band;
+        var zone = this.EO.zone;
+
+        var footprintpixels = this.calcCornerPixHorizonTrim();
+
+        if (footprintpixels.length==0){
+            return([[0,0],[0,0],[0,0],[0,0]])
+        }
+
+        var i;
+        var LLcorners = Array();
+        for(i=0;i<footprintpixels.length;i++){
+            var Putm = uv2xyconstz(footprintpixels[i][0],footprintpixels[i][1],this.P);
+            LLcorners.push(calcUTM2LL(Putm[0],Putm[1],zone,band));
+        }
+
+        this.footprint = LLcorners;
+    }
+
+    calccenterpoint() {
+        var utmcenterpoint = uv2xyconstz(this.IO.cx,this.IO.cy,this.P);
+        this.centerpoint = calcUTM2LL(utmcenterpoint[0],utmcenterpoint[1],this.EO.zone, this.EO.band);
+    }
+
+    calcP() {
+        var P1 = [this.IO.f*(Math.cos(this.EO.roll)*Math.cos(this.EO.yaw) + Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)) - this.IO.cx*(Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) - Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)),
+            this.IO.cx*(Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)) - this.IO.f*(Math.cos(this.EO.roll)*Math.sin(this.EO.yaw) - Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)),
+            - this.IO.cx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll) - this.IO.f*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll),
+            this.EO.Zc*(this.IO.cx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll) + this.IO.f*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)) + this.EO.Xc*(this.IO.cx*(Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) - Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)) - this.IO.f*(Math.cos(this.EO.roll)*Math.cos(this.EO.yaw) + Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw))) - this.EO.Yc*(this.IO.cx*(Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)) - this.IO.f*(Math.cos(this.EO.roll)*Math.sin(this.EO.yaw) - Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)))];
+        var P2 = [- this.IO.cy*(Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) - Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)) - this.IO.f*Math.cos(this.EO.pitch)*Math.sin(this.EO.yaw),
+            this.IO.cy*(Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)) - this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw),
+            - this.IO.f*Math.sin(this.EO.pitch) - this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll),
+            this.EO.Zc*(this.IO.f*Math.sin(this.EO.pitch) + this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)) - this.EO.Yc*(this.IO.cy*(Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)) - this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)) + this.EO.Xc*(this.IO.cy*(Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) - Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)) + this.IO.f*Math.cos(this.EO.pitch)*Math.sin(this.EO.yaw))];
+        var P3 = [Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw) - Math.cos(this.EO.yaw)*Math.sin(this.EO.roll),
+            Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch),
+            -Math.cos(this.EO.pitch)*Math.cos(this.EO.roll),
+            this.EO.Xc*(Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) - Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)) - this.EO.Yc*(Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) + Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)) + this.EO.Zc*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)];
+        this.P = [P1,P2,P3];
+    }
+    // UPDATE Plotting FUNCTIONS
+    addtomap(mapname){
         this.centermarker.addTo(mapname);
         this.uasmarker.addTo(mapname);
         this.footprintpolygon.addTo(mapname);
     }
-    redraw() {
-        this.redrawmarkers();
-        this.redrawfootprint();
-    }
-    redrawmarkers() {
-        this.uasmarker.setLatLng([this.EO.lat,this.EO.lon]);
+    updateUasMarker() {
+        this.uasmarker.setLatLng([this.EO.lat,this.EO.lng]);
         this.uasmarker.update();
+    }
 
-        this.centerpoint = this.calcCenterPoint();
+    updateCenterMarker(){
+        this.calccenterpoint();
         this.centermarker.setLatLng(this.centerpoint);
         this.centermarker.update();
     }
-    redrawfootprint() {
-        this.footprint = this.calcfootprint();
+
+    updateFootprintPolygon(){
+        this.calcfootprint();
         this.footprintpolygon.setLatLngs(this.footprint);
         this.footprintpolygon.redraw();
     }
 
-    calcfootprint() {
-        var MAX_D = 5000;
-        // Calc Pixel corners
-        var horizonangle = Math.atan(MAX_D/this.EO.Zc);
-        var ifov = Math.atan2(1,this.IO.f);
-        var vfov = ifov * this.IO.totpixy;
-        var hfov = ifov * this.IO.totpixx;
-
-        var pix_of_corners = [[this.IO.totpixx, this.IO.totpixy],
-            [this.IO.totpixx, 1],
-            [1, 1],
-            [1, this.IO.totpixy]];
-
-        var az_center = this.EO.yaw;
-        var el_center = this.EO.roll + Math.PI;
-        while (el_center>(2*Math.PI)){
-            el_center = el_center - 2 * Math.PI;
-        }
-        var cornerazel =  [[hfov/2,  vfov/2],
-                       [hfov/2, -vfov/2],
-                       [-hfov/2, -vfov/2],
-                       [-hfov/2,  vfov/2]];
-
-        var R = [[Math.cos(this.EO.pitch), -Math.sin(this.EO.pitch)], [Math.sin(this.EO.pitch), Math.cos(this.EO.pitch)]];
-
-        var rotazel = math.multiply(cornerazel, R);
-        var i;
-        var azel_of_corners = Array(4);
-
-        for(i=0;i<4;i++){
-            var newazel = [math.add(rotazel[i][0],az_center), math.add(rotazel[i][1],el_center)];
-            azel_of_corners[i] = newazel;
-        }
-
-        var cornerpixraw = Array(8);
-        var cornerpixfinal = Array(8);
-        for(i=0;i<4;i++){
-            var val = [1, azel_of_corners[i][0], azel_of_corners[i][1], pix_of_corners[i][0],pix_of_corners[i][1]];
-            cornerpixraw[2*i] = val;
-            cornerpixraw[2*i+1] = [0, 0, 0, 0, 0];
-            cornerpixfinal[2*i] = val;
-            cornerpixfinal[2*i+1] = [0, 0, 0, 0, 0];
-        }
-
-        for(i=0;i<7;i+=2){
-            var i1 = i;
-            var i2 = i+2;
-            if(i2>7) {
-                i2 = 0;
-            }
-            var az1 = cornerpixraw[i1][1];
-            var el1 = cornerpixraw[i1][2];
-            var az2 = cornerpixraw[i2][1];
-            var el2 = cornerpixraw[i2][2];
-
-            var T = (horizonangle-el1)/(el2-el1);
-            console.log(T);
-            if(T>0 && T<1)
-            {
-                if (el1 > el2){
-                    cornerpixfinal[i1]=[0, 0, 0, 0, 0];
-                }
-                else {
-                    cornerpixfinal[i2]=[0, 0, 0, 0, 0];
-                }
-                var x1 = cornerpixraw[i1][3];
-                var y1 = cornerpixraw[i1][4];
-                var x2 = cornerpixraw[i2][3];
-                var y2 = cornerpixraw[i2][4];
-
-                var seg_xpix = x1 + (x2 - x1) * T;
-                var seg_ypix = y1 + (y2 - y1) * T;
-                var seg_az = az1 + (az2 - az1) * T;
-                var seg_el = el1 + (el2 - el1) * T;
-                cornerpixfinal[i1+1] = [1, seg_az, seg_el, seg_xpix, seg_ypix];
-            }
-        }
-
-        var finalcoords = Array();
-        console.log('NEW CAMERA ORIENTATION')
-        for(i=0;i<8;i++){
-            if (cornerpixfinal[i][0]==1 && cornerpixfinal[i][2]<=horizonangle) {
-                var goodpixelcoords = [cornerpixfinal[i][3],this.IO.totpixy - cornerpixfinal[i][4]];
-                console.log(goodpixelcoords);
-                finalcoords.push(this.calcutm2ll(this.calcSpaceIntersection(goodpixelcoords[0], goodpixelcoords[1])));
-            }
-        }
-
-        return finalcoords;
-    }
-    calcCenterPoint() {
-        return this.calcutm2ll(this.calcSpaceIntersection(this.IO.cx, this.IO.cy));
-    }
-    calcSpaceIntersection(pixx, pixy) {
-
-        var Xw = -(this.EO.Zc*pixx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw) - this.EO.Xc*this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)**2 - this.EO.Zc*this.IO.cx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw) + this.EO.Xc*this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) - this.EO.Zc*this.IO.cx*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)*Math.sin(this.EO.roll)**2 + this.EO.Zc*this.IO.cy*Math.cos(this.EO.pitch)**2*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw) - this.EO.Xc*this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw)**2 - this.EO.Xc*pixy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) + this.EO.Zc*pixx*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)*Math.sin(this.EO.roll)**2 - this.EO.Zc*pixy*Math.cos(this.EO.pitch)**2*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw) + this.EO.Xc*this.IO.cy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 + this.EO.Zc*this.IO.cy*Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)**2*Math.sin(this.EO.yaw) + this.EO.Zc*this.IO.f*Math.cos(this.EO.pitch)**2*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) - this.EO.Xc*pixy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 - this.EO.Zc*pixy*Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)**2*Math.sin(this.EO.yaw) + this.EO.Zc*this.IO.f*Math.sin(this.EO.pitch)**2*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) - this.EO.Xc*this.IO.cx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) + this.EO.Xc*pixx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) - this.EO.Xc*this.IO.cx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 - this.EO.Xc*this.IO.cx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 + this.EO.Xc*pixx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 + this.EO.Xc*pixx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 - this.EO.Xc*this.IO.cx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 + this.EO.Xc*pixx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 + this.EO.Zc*this.IO.f*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch) - this.EO.Zc*this.IO.cy*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll) + this.EO.Zc*pixy*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll))/(this.IO.cx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) - pixx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) + this.IO.cx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 + this.IO.cx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 - pixx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 - pixx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 + this.IO.cx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 - pixx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 + this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)**2 - this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) + this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw)**2 + pixy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) - this.IO.cy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 + pixy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2);
-
-        var Yw = (this.EO.Zc*this.IO.cy*Math.cos(this.EO.pitch)**2*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw) + this.EO.Yc*this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)**2 - this.EO.Zc*pixy*Math.cos(this.EO.pitch)**2*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw) - this.EO.Yc*this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) + this.EO.Zc*this.IO.cx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)**2*Math.sin(this.EO.yaw) + this.EO.Zc*this.IO.cy*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)**2 + this.EO.Yc*this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw)**2 + this.EO.Zc*this.IO.f*Math.cos(this.EO.pitch)**2*Math.cos(this.EO.yaw)*Math.sin(this.EO.roll) + this.EO.Yc*pixy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) - this.EO.Zc*pixx*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)**2*Math.sin(this.EO.yaw) - this.EO.Zc*pixy*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)**2 - this.EO.Yc*this.IO.cy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 + this.EO.Zc*this.IO.cx*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw) + this.EO.Zc*this.IO.f*Math.cos(this.EO.yaw)*Math.sin(this.EO.pitch)**2*Math.sin(this.EO.roll) + this.EO.Yc*pixy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 - this.EO.Zc*pixx*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw) + this.EO.Yc*this.IO.cx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) - this.EO.Yc*pixx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) + this.EO.Yc*this.IO.cx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 + this.EO.Yc*this.IO.cx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 - this.EO.Yc*pixx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 - this.EO.Yc*pixx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 + this.EO.Yc*this.IO.cx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 - this.EO.Yc*pixx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 - this.EO.Zc*this.IO.f*Math.cos(this.EO.roll)*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw) + this.EO.Zc*this.IO.cy*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw) - this.EO.Zc*pixy*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw))/(this.IO.cx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) - pixx*Math.cos(this.EO.roll)**2*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch) + this.IO.cx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 + this.IO.cx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 - pixx*Math.cos(this.EO.roll)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.yaw)**2 - pixx*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2 + this.IO.cx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 - pixx*Math.sin(this.EO.pitch)*Math.sin(this.EO.roll)**2*Math.sin(this.EO.yaw)**2 + this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.cos(this.EO.yaw)**2 - this.IO.cy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) + this.IO.f*Math.cos(this.EO.pitch)*Math.cos(this.EO.roll)*Math.sin(this.EO.yaw)**2 + pixy*Math.cos(this.EO.pitch)*Math.cos(this.EO.yaw)**2*Math.sin(this.EO.roll) - this.IO.cy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2 + pixy*Math.cos(this.EO.pitch)*Math.sin(this.EO.roll)*Math.sin(this.EO.yaw)**2);
-
-        return [Xw, Yw];
+    updateCameraHorizonView(){
+        return 0;
     }
 
-    calcutm2ll(xy) {
-        var coordLatLng = L.utm({x: xy[0], y: xy[1], zone: this.EO.zone, band: this.EO.band}).latLng();
-        if (coordLatLng!=null) {
-            return [coordLatLng.lat, coordLatLng.lng];
-        }
-        return [0, 0]
+    updateGsdResolutionPolygons(){
+        return 0;
     }
-    // uv2gsd
+
+    updateAll(){
+        this.calcP();
+        this.calcfootprint();
+        this.updateUasMarker();
+        this.updateCenterMarker();
+        this.updateFootprintPolygon();
+        this.updateCameraHorizonView();
+        this.updateGsdResolutionPolygons();
+        updateSettings();
+    }
+}
+
+function uv2xyconstz(pixx,pixy,P){
+    //assumes Zw = 0;
+    var Xw = (P[0][1]*P[1][3] - P[0][3]*P[1][1] - P[0][1]*P[2][3]*pixy + P[0][3]*P[2][1]*pixy + P[1][1]*P[2][3]*pixx - P[1][3]*P[2][1]*pixx)/(P[0][0]*P[1][1] - P[0][1]*P[1][0] - P[0][0]*P[2][1]*pixy + P[0][1]*P[2][0]*pixy + P[1][0]*P[2][1]*pixx - P[1][1]*P[2][0]*pixx);
+    var Yw = -(P[0][0]*P[1][3] - P[0][3]*P[1][0] - P[0][0]*P[2][3]*pixy + P[0][3]*P[2][0]*pixy + P[1][0]*P[2][3]*pixx - P[1][3]*P[2][0]*pixx)/(P[0][0]*P[1][1] - P[0][1]*P[1][0] - P[0][0]*P[2][1]*pixy + P[0][1]*P[2][0]*pixy + P[1][0]*P[2][1]*pixx - P[1][1]*P[2][0]*pixx);
+    var s = (P[0][0]*P[1][1]*P[2][3] - P[0][0]*P[1][3]*P[2][1] - P[0][1]*P[1][0]*P[2][3] + P[0][1]*P[1][3]*P[2][0] + P[0][3]*P[1][0]*P[2][1] - P[0][3]*P[1][1]*P[2][0])/(P[0][0]*P[1][1] - P[0][1]*P[1][0] - P[0][0]*P[2][1]*pixy + P[0][1]*P[2][0]*pixy + P[1][0]*P[2][1]*pixx - P[1][1]*P[2][0]*pixx);
+
+    return [Xw, Yw, s];
+}
+
+function xyz2uvs(x,y,z,P){
+
+}
+
+
+function calcUTM2LL(x,y,zone,band){
+    return L.utm({x: x, y: y, zone: zone, band: band}).latLng();
+}
+
+function calcLL2UTM(lat,lng){
+    return L.latLng(lat, lng).utm();
+}
+function rad2deg(x){
+    return x*180/Math.PI;
+}
+function deg2rad(x){
+    return x*Math.PI/180;
+}
+
+function cart2sph(x,y,z){
+    var rho = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+    var phi = Math.atan2(y, x) + Math.PI / 2;
+    var theta = Math.acos(z / rho);
+    return [rho,phi,theta];
+
+}
+const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function deg_to_dms (deg) {
+    var d = Math.floor (deg);
+    var minfloat = (deg-d)*60;
+    var m = Math.floor(minfloat);
+    var secfloat = (minfloat-m)*60;
+    var s = Math.round(secfloat);
+    // After rounding, the seconds might become 60. These two
+    // if-tests are not necessary if no rounding is done.
+    if (s==60) {
+        m++;
+        s=0;
+    }
+    if (m==60) {
+        d++;
+        m=0;
+    }
+    return ("" + d + "&#176; " + m + "'" + s + '"');
 }

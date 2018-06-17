@@ -1,13 +1,83 @@
 function findHorizon(f,totpixx,totpixy,roll,pitch,yaw,horizonangle)
 totpixx = 4000;
 totpixy = 3000;
+cx = totpixx/2;
+cy = totpixy/2;
 f = 4000;
 
 yaw = 0;
-pitch = 70;
-roll = 40;
+pitch = 50;
+roll = 30;
 
-horizonangle = 1.550798992821746 * 180/pi;
+yaw = yaw*pi/180;
+pitch = pitch*pi/180;
+roll = roll*pi/180;
+
+horizonangle = 85;
+
+Xc = 0;
+Yc = 0;
+Zc = 200;
+
+vfov = 2 * atan2d(totpixy/2,f);
+hfov = 2 * atan2d(totpixx/2,f);
+
+%
+cornerpix = [1 1;totpixx 1;totpixx totpixy;1 totpixy; 1 1; cx cy];
+% cornerpix = [ones(size((1:totpixy)')) (1:totpixy)'];
+%
+K = [f 0 cx;0 f cy;0 0 1];
+
+% R2TaitBryan = [0 1 0;1 0 0;0 0 -1];
+% Rx = [1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)];
+% Ry = [cos(pitch) 0 -sin(pitch); 0 1 0;sin(pitch) 0 cos(pitch)];
+% Rz = [cos(yaw) sin(yaw) 0; -sin(yaw) cos(yaw) 0; 0 0 1];
+% R = Rx*Ry*Rz*R2TaitBryan;
+R_WORLD_2_AIR = [0 1 0;1 0 0;0 0 -1];
+R_AIR_2_CAMERA = [0 1 0;-1 0 0;0 0 1];
+R_AIR_ROLL = [1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)];
+R_AIR_PITCH = [cos(pitch) 0 -sin(pitch); 0 1 0;sin(pitch) 0 cos(pitch)];
+R_AIR_YAW = [cos(yaw) sin(yaw) 0; -sin(yaw) cos(yaw) 0; 0 0 1];
+R = R_AIR_2_CAMERA * R_AIR_ROLL * R_AIR_PITCH * R_AIR_YAW * R_WORLD_2_AIR;
+
+P = K * R * [eye(3) [-Xc;-Yc;-Zc]];
+
+R2 = R_AIR_2_CAMERA * R_AIR_ROLL * R_AIR_PITCH * R_AIR_YAW * R_WORLD_2_AIR;
+
+inv(R_AIR_ROLL)*inv(R_AIR_2_CAMERA);
+P(4,:)=[0 0 0 1];
+
+iP = inv(P);
+f2 = figure(2);clf
+allazel=[]
+for i=1:size(cornerpix,1)
+%     xyz = iP*[cornerpix(i,1);cornerpix(i,2);1;1]-[Xc;Yc;Zc;1];
+    xyz = inv(R2)*inv(K)*[cornerpix(i,1);cornerpix(i,2);1];
+    plot3([0 xyz(1)],[0 xyz(2)],[0 xyz(3)],'b.-');hold on;axis equal
+%     [az,el,~]=cart2sph(xyz(1),xyz(2),xyz(3));grid on
+    r = pythag(xyz(1),xyz(2));
+%     az = atan2d(xyz(3),xyz(2));
+     el = 90 + atan2d(xyz(3),r);
+   allazel(i,:)=[1 el];
+   allxyz(i,:) = xyz;
+end
+fill3(allxyz(1:4,1),allxyz(1:4,2),allxyz(1:4,3),'b','FaceAlpha',0.5);
+xlabel('x');
+ylabel('y');
+zlabel('z');
+f1 = figure(1);
+clf;
+plot(1:size(cornerpix,1),allazel(:,2),'b.-')
+hold on
+plot([1 5],[90 90],'k--');
+plot([1 5],[pitch pitch]*180/pi,'g--')
+plot([1 5],vfov/2 + [pitch pitch]*180/pi,'c--')
+plot([1 5],-vfov/2 + [pitch pitch]*180/pi,'c--')
+
+% axis equal
+
+
+
 %% Compute FOV Constants
 ifov = atan2d(1,f);
 vfov = ifov*totpixy;

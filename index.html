@@ -1,152 +1,444 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>UAS Ortho</title>
-    <!-- External Stylesheets -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/>
-    <!-- Add the Leaflet JavaScript library -->
-    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
-    <!-- Add UTM to Leaflet -->
-    <script src="https://jjimenezshaw.github.io/Leaflet.UTM/L.LatLng.UTM.js"></script>
-    <!-- Awesome Font -->
+    <link rel="stylesheet" href="libs/bootstrap-4.1.1-dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    // for matrix math
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.1.2/math.min.js"></script>
-    // For Sliders
-    <link href="css/customSlider.css" rel="stylesheet">
-
-    <!-- leaflet sidebar -->
-    <link rel="stylesheet" href="css/leaflet-sidebar.css" />
-    <script src="js/leaflet-sidebar.js"></script>
-
-
-    <script src="js/customLeaflet.js"></script>  // UAS icon
-    <script src="js/photogrammetry.js"></script> // Photogrammetry Equations
-
 </head>
 <body>
-// div to hold the sidebar
-<div id="sidebar" class="sidebar collapsed">
-    <!-- Nav tabs -->
-    <div class="sidebar-tabs">
-        <ul role="tablist">
-            <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#profile" role="tab"><i class="fa fa-user"></i></a></li>
-            <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li>
-            <li><a href="https://github.com/Turbo87/sidebar-v2" role="tab" target="_blank"><i class="fa fa-github"></i></a></li>
-        </ul>
 
-        <ul role="tablist">
-            <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
-        </ul>
+
+<div class="wrapper">
+    <!-- BOOTSTRAP HEADER -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light py-0" style="z-index:100;">
+        <img src="img/logo.png"  height="50px" class="d-inline-block align-top">
+        <div class="d-flex justify-content-left nav-item">
+            <span class="navbar-text"><h2> &nbsp;UAS Ortho &nbsp;&nbsp;&nbsp;&nbsp;</h2></span>
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a id="navbtnSettings" class="nav-item nav-link" href="#">Settings <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link disabled" href="#">Tools</a>
+                <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#infomodal">About</a>
+                <a class="nav-item nav-link disabled" href="#">Help</a>
+            </div>
+        </div>
+
+    </nav>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <!-- IO Parameters -->
+        <button class="accordion">Interior Orientation</button>
+        <div id="IOgroup" class="panel">
+
+            <div class="form-group row">
+                <div class="col-12">
+                    <select class="form-control eoio" id="camselect" name="selectcamera"></select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputFocal" class="col-6 col-form-label">Focal (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="4000" min="0" id="inputFocal">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputHorizontalPixels" class="col-6 col-form-label">Width (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="4000" min="0" id="inputHorizontalPixels">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputVerticalPixels" class="col-6 col-form-label">Height (px)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="3000" min="0" id="inputVerticalPixels" >
+                </div>
+            </div>
+        </div>
+        <!-- EO Parameters -->
+        <button class="accordion">Exterior Orientation</button>
+        <div id="EOgroup" class="panel">
+            <div class="form-group row">
+                <label for="inputRoll" class="col-6 col-form-label">Roll (deg)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="0" min="0" id="inputRoll">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputPitch" class="col-6 col-form-label">Pitch (deg)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="40" min="0" max="89" id="inputPitch">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputYaw" class="col-6 col-form-label">Yaw (deg)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="100" min="-360" max="360" id="inputYaw">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputAlt" class="col-6 col-form-label">Altitude (m)</label>
+                <div class="col-6">
+                    <input class="form-control eoio" type="number" value="100" min="0" id="inputAlt">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputLon" class="col-4 col-form-label">Longitude</label>
+                <div class="col-8">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="-123.2718586921692" min="-180" max="180" id="inputLon">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputLat" class="col-4 col-form-label">Latitude</label>
+                <div class="col-8">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="44.566142496389155" min="0" max="90" id="inputLat">
+                </div>
+            </div>
+        </div>
+        <!-- Projection -->
+        <button class="accordion">Projection</button>
+        <div id="ProjectionGroup" class="panel">
+             <div class="form-group row">
+                <div class="col-12">
+                    <select class="form-control eoio" id="projselect" name="Projection"></select>
+                </div>
+            </div>
+
+            <div class="form-group row" id="projstrdiv">
+                <div class="col-12">
+                    <input class="form-control eoio" type="text" value="" min="0" id="projString">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="showX" class="col-4 col-form-label">X</label>
+                <div class="col-8">
+                    <input class="form-control" type="text" value="" id="showX" disabled>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="showY" class="col-4 col-form-label">Y</label>
+                <div class="col-8">
+                    <input class="form-control" type="text" value="" id="showY" disabled>
+                </div>
+            </div>
+        </div>
+        <!-- Appearance -->
+        <button class="accordion">Appearance</button>
+        <div id="appearanceGroup" class="panel">
+
+            <div class="form-group row">
+                <label for="colorCamera" class="col-8 col-form-label">Camera Marker</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#000000" id="colorCamera" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="colorLookAt" class="col-8 col-form-label">Look At Marker</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#000000" id="colorLookAt" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="colorFootprintLine" class="col-8 col-form-label">Footprint Line</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#F58820" id="colorFootprintLine" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="colorFootprintFill" class="col-8 col-form-label">Footprint Fill</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#F58820" id="colorFootprintFill" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="fillOpacity" class="col-8 col-form-label">Fill Opacity</label>
+                <div class="col-4">
+                    <input class="form-control" type="number" value="0.2" step="0.1" min="0" max="1" id="fillOpacity" onclick="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="lineWeight" class="col-8 col-form-label">Line Weight</label>
+                <div class="col-4">
+                    <input class="form-control" type="number" value="5" min="0" id="lineWeight" onclick="colorChange();">
+                </div>
+            </div>
+        </div>
+
+        <!-- Colorbar --
+        <button class="accordion">Colorbar</button>
+        <div id="colorbarGroup" class="panel">
+
+            <div class="form-group row">
+                <label for="selectscalar" class="col-4 col-form-label">Scalar</label>
+                <div class="col-8">
+                    <select class="form-control" id="selectscalar" name="Scalar">
+                        <option value="A">None</option>
+                        <option value="B">GSD</option>
+                        <option value="C">GSD Ratio</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="inputCmin" class="col-6 col-form-label">Minimum</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="0" min="0" id="inputCmin">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="inputCmax" class="col-6 col-form-label">Maximum</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="20" min="0" id="inputCmax">
+                </div>
+            </div>
+            -->
+        </div>
+
     </div>
-
-    <!-- Tab panes -->
-    <div class="sidebar-content">
-        <div class="sidebar-pane" id="home">
-            <h1 class="sidebar-header">Camera Position</h1>
-            <div class="slidecontainer" style="width:100%">
-                Altitude:
-                <input id="altnumber" class="numinput" title="Altitude" type="number" min="10" max="500" value="100" step="1" oninput="updateSlider(this)">
-                meters
-                <input id="altslider" class="slider"   title="Altitude" type="range"  min="10" max="500" value="100" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Roll:
-                <input id="rollnumber" class="numinput" title="Roll" type="number" min="-90" max="90" value="0" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="rollslider" class="slider"   title="Roll" type="range"  min="-90" max="90" value="0" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Pitch:
-                <input id="pitchnumber" class="numinput" title="Pitch" type="number" min="0" max="90" value="40" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="pitchslider" class="slider"   title="Pitch" type="range"  min="0" max="90" value="40" oninput="updateText(this)">
-            </div>
-
-            <div class="slidecontainer" style="width:100%">
-                Yaw:
-                <input id="yawnumber" class="numinput" title="Yaw" type="number" min="0" max="360" value="45" step="1" oninput="updateSlider(this)">
-                deg
-                <input id="yawslider" class="slider"   title="Yaw" type="range"  min="0" max="360" value="45" oninput="updateText(this)">
-            </div>
+    <!-- Page Content -->
+    <div id="content">
+        <div id="settingsbtndiv">
+            <button id="settingsbtn" onclick="toggleSettings()"> <span class="fa fa-cog fa-2x"></span> </button>
         </div>
 
-        <div class="sidebar-pane" id="profile">
-            <h1 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fa fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
+
+        <div id="coordinateBox">
+            <a id="cursorBox"></a>
         </div>
 
-        <div class="sidebar-pane" id="messages">
-            <h1 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div id="pixelBox">
+            blah blah blah
         </div>
 
-        <div class="sidebar-pane" id="settings">
-            <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+        <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
+
+    </div>
+    <!-- Info Modal -->
+    <div class="modal fade" id="infomodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header modal-header-success">
+                    <h4 class="modal-title">Information</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Project</h5>
+                    <p>
+                        This project depicts the footprint of an orthophoto taken from an aerial camera, which can be utilized to do mission planning with UAS.
+                        The photogrammetric equations use a pinhole camera, with the assumption that altitude is the height above a flat plane with no curvature.
+                        <br>
+                        <i class="fa fa-github hyp"></i> <a class="hyp" href="https://github.com/hokiespurs/uasortho">More information</a>.
+                    </p>
+                    <hr>
+                    <h5>Attribution</h5>
+                    <ul>
+                        <li>The map is based on <a class="hyp" href="https://leafletjs.com/">leaflet</a></li>
+                        <li>The layout utilizes <a class="hyp" href="https://getbootstrap.com/">Bootstrap</a></li>
+                        <li>Coordinate conversions are handled with <a class="hyp" href="http://proj4js.org/">proj4js</a></li>
+                    </ul>
+                    <hr>
+                    <h5>Author</h5>
+                    <div style="display:flex">
+                        <div style="width:150px">
+                            <img width="100%" src="img/profkayak_circle.jpg">
+                        </div>
+                        <div style="flex: 1;padding-left: 30px;">
+                            <h6>Richie Slocum</h6>
+                            <hr>
+                            <p> PhD Student, Oregon State University
+                                <br>
+                                Civil Engineering - Geomatics
+                                <br>
+                                <a class="hyp" href="mailto:slocumr@oregonstate.edu">slocumr@oregonstate.edu</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-// div to hold the map
-<div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
-
-//script for sliders
-<script>
-    function updateSlider(elem) {
-        $(elem).next().val($(elem).val());
-        updateCamVars();
-    }
-    function updateText(elem) {
-        $(elem).prev().val($(elem).val());
-        updateCamVars();
-    }
-    function updateCamVars() {
-        myCamera.EO.Zc = $("#altnumber").val();
-        myCamera.EO.pitch = $("#rollnumber").val() * Math.PI/180;
-        myCamera.EO.roll = $("#pitchnumber").val() * Math.PI/180 + Math.PI;
-        myCamera.EO.yaw = $("#yawnumber").val() * Math.PI/180;
-        myCamera.redraw();
-    }
-    function updateInputFields() {
-        $("#altnumber").val(myCamera.EO.Zc);
-        $("#rollnumber").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchnumber").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
-        $("#yawnumber").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
-        $("#altslider").val(myCamera.EO.Zc);
-        $("#rollslider").val(Math.round(myCamera.EO.pitch * 180/Math.PI*10)/10);
-        $("#pitchslider").val(Math.round((myCamera.EO.roll * 180/Math.PI-180)*10)/10);
-        $("#yawslider").val(Math.round(myCamera.EO.yaw  * 180/Math.PI*10)/10);
-    }
-</script>
+<!-- add js libraries -->
+<script src="libs/jquery-3.1.1/jquery.js"></script>
+<script src="libs/bootstrap-4.1.1-dist/js/bootstrap.js"></script>
+<script src="libs/leaflet/leaflet.js"></script>
+<script src="libs/leafletUTM/L.LatLng.UTM.js"></script>
+<script src="libs/popper/popper.js"></script>
+<script src="libs/math/math.min.js"></script>
+<script src="libs/proj4js-2.4.3/proj4.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/photogrammetry.js"></script>
+<script src="js/myleafletmap.js"></script>
+<script src="assets/cameras.js"></script>
+<script src="assets/locations.js"></script>
+<script src="assets/projections.js"></script>
 
 <script>
+    // GLOBALS
+    var validproj4 = true;
+    const leafletproj = 'WGS84';
+    var projTo = '';
 
-    // Create variable to hold map element, give initial settings to map
-    var mymap = L.map('mapid', {
-        center: [44.56576, -123.27888],
-        zoom: 16
-    });
-    var sidebar = L.control.sidebar('sidebar').addTo(mymap);
+    // Update Functions
+    $('.eoio').on("change",updateMap);
+    $('.eoio').on("click",updateMap);
 
-    // Add OpenStreetMap tile layer to map element
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(mymap);
+    // Populate Camera Dropdown
+    var i;
+    var camselect = $('#camselect');
+    for(i=0;i<cameras.length;i++){
+        camselect.append('<option value="' + i.toString() + '">' + cameras[i].name + '</option>');
+    }
+    camselect.append('<option value="' + i.toString() + '">Custom</option>');
+    ncams = cameras.length;
+    populateCameras();
+    camselect.on("change",populateCameras);
 
-    var myCamera = new Camera(
-        new IO(4000,4000,3000),
-        new EO(44.56738, -123.27484, 200, 0, 0, 0));
-    myCamera.addtomap(mymap);
-    updateCamVars();
-    // Create point feature for UAS
-    // var uasPoint = L.marker([44.56822, -123.28034],{icon: uasicon, draggable: true}).addTo(mymap);
+    function populateCameras(){
+        var currentval = camselect.val();
+        if (parseFloat(currentval) !== ncams){
+            $('#inputFocal').prop('readOnly',true);
+            $('#inputHorizontalPixels').prop('readOnly',true);
+            $('#inputVerticalPixels').prop('readOnly',true);
+
+            $('#inputFocal').val(cameras[currentval].f);
+            $('#inputHorizontalPixels').val(cameras[currentval].pixx);
+            $('#inputVerticalPixels').val(cameras[currentval].pixy);
+        }
+        else {
+            $('#inputFocal').prop('readOnly',false);
+            $('#inputHorizontalPixels').prop('readOnly',false);
+            $('#inputVerticalPixels').prop('readOnly',false);
+        }
+    }
+
+    // Populate Projection Dropdown
+    var projselect = $('#projselect');
+    for(i=0;i<projections.length;i++){
+        projselect.append('<option value="' + i.toString() + '">' + projections[i].name + '</option>');
+    }
+    projselect.append('<option value="' + i.toString() + '">Custom</option>');
+    nprojections = projections.length;
+    populateProjection();
+    projselect.on("change",populateProjection);
+
+    function populateProjection() {
+        var currentval = projselect.val();
+
+        if (parseFloat(currentval) !== nprojections) {
+            $('#projString').val(projections[currentval].str);
+            $('#projString').prop('readOnly', true);
+            $('#projstrdiv').hide();
+        }
+        else {
+            $('#projString').val('<enter proj4 String>');
+            $('#projString').prop('readOnly', false);
+            $('#projstrdiv').show();
+        }
+    }
+
+    // DO ONCE
+    updateSettings();
+    colorChange();
+    $('#pixelBox').hide();
+    $('').hide();
     //
-    // // Listen for a click event on the Map element
-    // uasPoint.on('dragend',reDrawOrtho);
+    function colorChange(){
+        $('.camera').css('color',$('#colorCamera').val());
+        $('.target').css('color',$('#colorLookAt').val());
+        myCamera.footprintpolygon.setStyle({color: $('#colorFootprintLine').val()});
+        myCamera.footprintpolygon.setStyle({fillColor: $('#colorFootprintFill').val()});
+        myCamera.footprintpolygon.setStyle({weight: $('#lineWeight').val()});
+        myCamera.footprintpolygon.setStyle({fillOpacity: $('#fillOpacity').val()});
+    }
+
+    function updateMap(){
+        myCamera.IO.cx = $('#inputHorizontalPixels').val()/2;
+        myCamera.IO.cy = $('#inputVerticalPixels').val()/2;
+        myCamera.IO.f = $('#inputFocal').val();
+        myCamera.IO.totpixx = myCamera.IO.cx*2;
+        myCamera.IO.totpixy = myCamera.IO.cy*2;
+        myCamera.IO.recalc();
+
+        myCamera.EO.roll = $('#inputRoll').val() * Math.PI/180;
+        myCamera.EO.pitch = $('#inputPitch').val() * Math.PI/180;
+        myCamera.EO.yaw = $('#inputYaw').val() * Math.PI/180;
+
+        myCamera.EO.lat = $('#inputLat').val();
+        myCamera.EO.lng = $('#inputLon').val();
+        myCamera.EO.Zc = $('#inputAlt').val();
+
+        myCamera.EO.calcUTM();
+        myCamera.EO.calcRT();
+
+        myCamera.updateAll();
+
+        updateSettings();
+    }
+    function updateSettings(){
+        $('#inputHorizontalPixels').val(myCamera.IO.cx*2);
+        $('#inputVerticalPixels').val(myCamera.IO.cy*2);
+        $('#inputFocal').val(myCamera.IO.f);
+
+        $('#inputRoll').val((myCamera.EO.roll * 180/ Math.PI).toFixed(2));
+        $('#inputPitch').val((myCamera.EO.pitch * 180/Math.PI).toFixed(2));
+        var myYaw = myCamera.EO.yaw * 180/ Math.PI;
+        if (myYaw<0){myYaw = myYaw + 360;}
+        $('#inputYaw').val(myYaw.toFixed(2));
+
+        $('#inputLat').val(Math.round(myCamera.EO.lat * 100000)/100000);
+        $('#inputLon').val(Math.round(myCamera.EO.lng * 100000)/100000);
+        $('#inputAlt').val(myCamera.EO.Zc);
+
+        // Check valid proj4
+        projTo = $('#projString').val();
+        try {
+            var xy = proj4(leafletproj, projTo, [myCamera.EO.lng, myCamera.EO.lat]);
+            validproj4 = true;
+        }
+        catch {
+            validproj4 = false;
+        }
+
+        // Fill Projection X Y if valid
+        if (validproj4){
+            $('#showX').val(numberWithCommas(xy[0].toFixed(1)));
+            $('#showY').val(numberWithCommas(xy[1].toFixed(1)));
+        }
+        else{
+            $('#showX').val('');
+            $('#showY').val('');
+        }
+    }
+
+    function updatecursorpos(){
+        var str='';
+        if (validproj4){
+            var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
+            str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
+
+            str = str + "<br>";
+        }
+        str = str + "Lon: " + deg_to_dms(cursor.lon) + " Lat: " + deg_to_dms(cursor.lat);
+        $('#cursorBox').html(str);
+    }
+
 </script>
+
 </body>
 </html>
