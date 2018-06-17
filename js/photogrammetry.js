@@ -273,6 +273,8 @@ class Camera {
         return el;
     }
     calcSegmentInterp(pix1, pix2, el1, el2, horizonangle, pixellist){
+        // TODO FIX THIS CLUNKY CODE
+
         // Null Case: both points are above the horizon angle
         if (el1>=horizonangle && el2>=horizonangle){return pixellist;}
 
@@ -291,21 +293,33 @@ class Camera {
         if (xvarying){
             var ypix = pix1[1];
             var xpix = pix1[0] + (pix2[0] - pix1[0]) * T;
-            pixellist.push([xpix, ypix])
         }
         else {
             var xpix = pix1[0];
             var ypix = pix1[1] + (pix2[1] - pix1[1]) * T;
-            pixellist.push([xpix, ypix])
         }
+        if (this.calcEl(xpix,ypix)>horizonangle){
+            el2 = this.calcEl(xpix,ypix);
+            pix2 = [xpix, ypix];
+            T = (horizonangle-el1)/(el2-el1);
+            if (xvarying){
+                ypix = pix1[1];
+                xpix = pix1[0] + (pix2[0] - pix1[0]) * T;
+            }
+            else {
+                xpix = pix1[0];
+                ypix = pix1[1] + (pix2[1] - pix1[1]) * T;
+            }
+        }
+        pixellist.push([xpix, ypix]);
+
         return pixellist;
     }
     // CALC FUNCTIONS
     calcCornerPixHorizonTrim() {
         // determine angle to not go over
 
-        var MAX_D = 10000;
-        var horizonangle = Math.atan(MAX_D/this.EO.Zc);
+        let horizonangle = 89*Math.PI/180;
         // [ 4       1 ]
         // |           | Pixel corners in this order
         // |           |
@@ -341,22 +355,16 @@ class Camera {
 
         var footprintpixels = this.calcCornerPixHorizonTrim();
 
+        if (footprintpixels.length==0){
+            return([[0,0],[0,0],[0,0],[0,0]])
+        }
+
         var i;
         var LLcorners = Array();
         for(i=0;i<footprintpixels.length;i++){
             var Putm = uv2xyconstz(footprintpixels[i][0],footprintpixels[i][1],this.P);
             LLcorners.push(calcUTM2LL(Putm[0],Putm[1],zone,band));
         }
-
-        var P1utm = uv2xyconstz(1,1,this.P);
-        var P2utm = uv2xyconstz(this.IO.totpixx,1,this.P);
-        var P3utm = uv2xyconstz(this.IO.totpixx,this.IO.totpixy,this.P);
-        var P4utm = uv2xyconstz(1,this.IO.totpixy,this.P);
-
-        var P1LL = calcUTM2LL(P1utm[0],P1utm[1],zone,band);
-        var P2LL = calcUTM2LL(P2utm[0],P2utm[1],zone,band);
-        var P3LL = calcUTM2LL(P3utm[0],P3utm[1],zone,band);
-        var P4LL = calcUTM2LL(P4utm[0],P4utm[1],zone,band);
 
         this.footprint = LLcorners;
     }
