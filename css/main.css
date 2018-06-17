@@ -131,10 +131,11 @@
 
 input {
     text-align: right;
+    cursor: pointer;
 }
 input[type=color].form-control {
     padding: 0;
-    height: 40px
+    height: 40px;
  }
 
 .hyp{

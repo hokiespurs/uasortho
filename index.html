@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>UAS Ortho</title>
     <link rel="stylesheet" href="libs/bootstrap-4.1.1-dist/css/bootstrap.css"/>
     <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
     <link rel="stylesheet" href="css/main.css"/>
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="libs/jscolor-2.0.5/jscolor.js"></script>
 </head>
 <body>
 
@@ -138,38 +141,38 @@
         <div id="appearanceGroup" class="panel">
 
             <div class="form-group row">
-                <label for="colorCamera" class="col-8 col-form-label">Camera Marker</label>
-                <div class="col-4">
-                    <input class="form-control" type="color" value="#000000" id="colorCamera" onchange="colorChange();">
+                <label for="colorCamera" class="col-6 col-form-label">Camera Marker</label>
+                <div class="col-6">
+                    <input class="form-control jscolor {hash:true}" value="#000000" id="colorCamera" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="colorLookAt" class="col-8 col-form-label">Look At Marker</label>
-                <div class="col-4">
-                    <input class="form-control" type="color" value="#000000" id="colorLookAt" onchange="colorChange();">
+                <label for="colorLookAt" class="col-6 col-form-label">Target Marker</label>
+                <div class="col-6">
+                    <input class="form-control jscolor {hash:true}" value="#000000" href="" id="colorLookAt" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="colorFootprintLine" class="col-8 col-form-label">Footprint Line</label>
-                <div class="col-4">
-                    <input class="form-control" type="color" value="#F58820" id="colorFootprintLine" onchange="colorChange();">
+                <label for="colorFootprintLine" class="col-6 col-form-label">Footprint Line</label>
+                <div class="col-6">
+                    <input class="form-control jscolor {hash:true}" value="#F58820" id="colorFootprintLine" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="colorFootprintFill" class="col-8 col-form-label">Footprint Fill</label>
-                <div class="col-4">
-                    <input class="form-control" type="color" value="#F58820" id="colorFootprintFill" onchange="colorChange();">
+                <label for="colorFootprintFill" class="col-6 col-form-label">Footprint Fill</label>
+                <div class="col-6">
+                    <input class="form-control jscolor {hash:true}" value="#F58820" id="colorFootprintFill" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="fillOpacity" class="col-8 col-form-label">Fill Opacity</label>
-                <div class="col-4">
+                <label for="fillOpacity" class="col-6 col-form-label">Fill Opacity</label>
+                <div class="col-6">
                     <input class="form-control" type="number" value="0.2" step="0.1" min="0" max="1" id="fillOpacity" onclick="colorChange();">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="lineWeight" class="col-8 col-form-label">Line Weight</label>
-                <div class="col-4">
+                <label for="lineWeight" class="col-6 col-form-label">Line Weight</label>
+                <div class="col-6">
                     <input class="form-control" type="number" value="5" min="0" id="lineWeight" onclick="colorChange();">
                 </div>
             </div>
