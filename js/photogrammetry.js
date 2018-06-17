@@ -193,14 +193,14 @@ class Camera {
         this.centermarker=new L.marker(this.centerpoint, {
             draggable: true,
             icon: L.divIcon({
-                html: '<i class="fa fa-bullseye"></i>',
+                html: '<i class="fa fa-plus"></i>',
                 iconSize: [20, 20],
                 className: 'target'
             })
         });
         this.centermarker.on("drag",this.uastargetmoved,this);
 
-        this.footprintpolygon=new L.Polygon(this.footprint,{color:'orange', weight: 5});
+        this.footprintpolygon=new L.Polygon(this.footprint,{color:'#5cb85c', weight: 5});
 
         //this.gsdResolutionPolygons=0;
         //this.cameraHorizonView=0;
@@ -458,4 +458,26 @@ function cart2sph(x,y,z){
     var theta = Math.acos(z / rho);
     return [rho,phi,theta];
 
+}
+const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function deg_to_dms (deg) {
+    var d = Math.floor (deg);
+    var minfloat = (deg-d)*60;
+    var m = Math.floor(minfloat);
+    var secfloat = (minfloat-m)*60;
+    var s = Math.round(secfloat);
+    // After rounding, the seconds might become 60. These two
+    // if-tests are not necessary if no rounding is done.
+    if (s==60) {
+        m++;
+        s=0;
+    }
+    if (m==60) {
+        d++;
+        m=0;
+    }
+    return ("" + d + "&#176; " + m + "'" + s + '"');
 }

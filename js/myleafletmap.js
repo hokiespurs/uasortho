@@ -5,7 +5,7 @@ var grayscale = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png'),
 
 var mymap = L.map('mapid', {
     center: [44.56576, -123.27888],
-    zoom: 14,
+    zoom: 16,
     detectRetina: true, // detect whether the sceen is high resolution or not.
     attributionControl: false,
     zoomControl: false,
@@ -25,7 +25,7 @@ L.control.layers(baseMaps).addTo(mymap);
 // add Camera
 var myCamera = new Camera(
     new IO(4000,4000,3000,'test'),
-    new EO(44.56738, -123.27484, 200, 30*Math.PI/180, 50*Math.PI/180, 0));
+    new EO(44.566142496389155, -123.2718586921692, 120, 0*Math.PI/180, 60*Math.PI/180, 270*Math.PI/180));
 
 myCamera.addtomap(mymap);
 

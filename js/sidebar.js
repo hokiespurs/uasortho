@@ -10,7 +10,7 @@ function toggleSettings(){
         $("#content").animate({left: 300});
         settingsVisible=true;
     }
-}
+    setTimeout(function(){ mymap.invalidateSize()}, 500);}
 
 var acc = document.getElementsByClassName("accordion");
 var i;

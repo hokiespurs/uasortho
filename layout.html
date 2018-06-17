@@ -67,19 +67,19 @@
         <button class="accordion">Exterior Orientation</button>
         <div id="EOgroup" class="panel">
             <div class="form-group row">
-                <label for="inputRoll" class="col-6 col-form-label">Roll</label>
+                <label for="inputRoll" class="col-6 col-form-label">Roll (deg)</label>
                 <div class="col-6">
                     <input class="form-control eoio" type="number" value="0" min="0" id="inputRoll">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="inputPitch" class="col-6 col-form-label">Pitch</label>
+                <label for="inputPitch" class="col-6 col-form-label">Pitch (deg)</label>
                 <div class="col-6">
                     <input class="form-control eoio" type="number" value="40" min="0" id="inputPitch">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="inputYaw" class="col-6 col-form-label">Yaw</label>
+                <label for="inputYaw" class="col-6 col-form-label">Yaw (deg)</label>
                 <div class="col-6">
                     <input class="form-control eoio" type="number" value="100" min="-360" max="360" id="inputYaw">
                 </div>
@@ -93,13 +93,13 @@
             <div class="form-group row">
                 <label for="inputLon" class="col-4 col-form-label">Longitude</label>
                 <div class="col-8">
-                    <input class="form-control eoio" type="number" step = "0.0001" value="-123.27888" min="-180" max="180" id="inputLon">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="-123.2718586921692" min="-180" max="180" id="inputLon">
                 </div>
             </div>
             <div class="form-group row">
                 <label for="inputLat" class="col-4 col-form-label">Latitude</label>
                 <div class="col-8">
-                    <input class="form-control eoio" type="number" step = "0.0001" value="44.56576" min="0" max="90" id="inputLat">
+                    <input class="form-control eoio" type="number" step = "0.0001" value="44.566142496389155" min="0" max="90" id="inputLat">
                 </div>
             </div>
         </div>
@@ -107,30 +107,28 @@
         <button class="accordion">Projection</button>
         <div id="ProjectionGroup" class="panel">
              <div class="form-group row">
-                <label for="projcoord" class="col-4 col-form-label">Name</label>
-                <div class="col-8">
-                    <select class="form-control" id="projcoord" name="Projection">
-                        <option value="A">Projection A</option>
-                        <option value="B">Projection B</option>
-                        <option value="C">Projection C</option>
-                    </select>
+                <div class="col-12">
+                    <select class="form-control eoio" id="projselect" name="Projection"></select>
                 </div>
             </div>
 
-            <div id="projnameinputline" class="form-group row">
-                <label for="projName" class="col-4 col-form-label">Name</label>
-                <div class="col-8">
-                    <input class="form-control" type="text" value="FRF Coords" min="0" id="projName">
+            <div class="form-group row" id="projstrdiv">
+                <div class="col-12">
+                    <input class="form-control eoio" type="text" value="" min="0" id="projString">
                 </div>
             </div>
 
             <div class="form-group row">
-                <label for="projString" class="col-4 col-form-label">
-                    str
-                    <button id="projstrquestion">?</button>
-                </label>
+                <label for="showX" class="col-4 col-form-label">X</label>
                 <div class="col-8">
-                    <input class="form-control" type="text" value="aa" min="0" id="projString">
+                    <input class="form-control" type="text" value="" id="showX" disabled>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="showY" class="col-4 col-form-label">Y</label>
+                <div class="col-8">
+                    <input class="form-control" type="text" value="" id="showY" disabled>
                 </div>
             </div>
         </div>
@@ -139,14 +137,44 @@
         <div id="appearanceGroup" class="panel">
 
             <div class="form-group row">
-                <div class="col-2">
-                    <input class="form-control" type="checkbox" value="aa" min="0" id="toggleLegend">
+                <label for="colorCamera" class="col-8 col-form-label">Camera Marker</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#000000" id="colorCamera" onchange="colorChange();">
                 </div>
-                <label for="toggleLegend" class="col-10 col-form-label">Show Legend</label>
+            </div>
+            <div class="form-group row">
+                <label for="colorLookAt" class="col-8 col-form-label">Look At Marker</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#000000" id="colorLookAt" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="colorFootprintLine" class="col-8 col-form-label">Footprint Line</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#F58820" id="colorFootprintLine" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="colorFootprintFill" class="col-8 col-form-label">Footprint Fill</label>
+                <div class="col-4">
+                    <input class="form-control" type="color" value="#F58820" id="colorFootprintFill" onchange="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="fillOpacity" class="col-8 col-form-label">Fill Opacity</label>
+                <div class="col-4">
+                    <input class="form-control" type="number" value="0.2" step="0.1" min="0" max="1" id="fillOpacity" onclick="colorChange();">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="lineWeight" class="col-8 col-form-label">Line Weight</label>
+                <div class="col-4">
+                    <input class="form-control" type="number" value="5" min="0" id="lineWeight" onclick="colorChange();">
+                </div>
             </div>
         </div>
 
-        <!-- Colorbar -->
+        <!-- Colorbar --
         <button class="accordion">Colorbar</button>
         <div id="colorbarGroup" class="panel">
 
@@ -173,7 +201,7 @@
                     <input class="form-control" type="number" value="20" min="0" id="inputCmax">
                 </div>
             </div>
-
+            -->
         </div>
 
     </div>
@@ -186,11 +214,7 @@
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fa fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
         <div id="coordinateBox">
-            <a>Coordinate System: <a id="coordboxCoordSysText">WGS84</a> </a><br>
-            <a>Camera : <a id="coordboxCamText">X: 1000 Y:2000</a></a><br>
-            <a>Look-at: <a id="coordboxLookatText">foo</a></a><br>
-            <a>Cursor : <a id="coordboxCursorText">foo</a></a><br>
-            <a>AGL : <a id="coordboxAGLText">100m</a></a><br>
+            <a id="cursorBox"></a>
         </div>
 
         <div id="pixelBox">
@@ -209,7 +233,7 @@
 <script src="libs/leafletUTM/L.LatLng.UTM.js"></script>
 <script src="libs/popper/popper.js"></script>
 <script src="libs/math/math.min.js"></script>
-<script src="libs/proj4js-2.4.3/dist/proj4.js"></script>
+<script src="libs/proj4js-2.4.3/proj4.js"></script>
 <script src="js/sidebar.js"></script>
 <script src="js/photogrammetry.js"></script>
 <script src="js/myleafletmap.js"></script>
@@ -219,24 +243,15 @@
 
 <script>
     // GLOBALS
-    var pixx = 4000,
-        pixy = 3000,
-        f    = 4000,
-        campos = {x: 100, y:100, z:100},
-        lookatpos = {x: 100, y:100, z:100},
-        cursorpos = {x: 100, y:100, z:100},
-        camorientation = {roll: 0, pitch: 40, yaw: 100};
-
-    var showPixelBox = true,
-        showCoords = true;
+    var validproj4 = true;
+    const leafletproj = 'WGS84';
+    var projTo = '';
 
     // Update Functions
     $('.eoio').on("change",updateMap);
     $('.eoio').on("click",updateMap);
 
-    // DO ONCE
-    updateSettings();
-
+    // Populate Camera Dropdown
     var i;
     var camselect = $('#camselect');
     for(i=0;i<cameras.length;i++){
@@ -245,8 +260,8 @@
     camselect.append('<option value="' + i.toString() + '">Custom</option>');
     ncams = cameras.length;
     populateCameras();
-
     camselect.on("change",populateCameras);
+
     function populateCameras(){
         var currentval = camselect.val();
         if (parseFloat(currentval) !== ncams){
@@ -263,10 +278,47 @@
             $('#inputHorizontalPixels').prop('readOnly',false);
             $('#inputVerticalPixels').prop('readOnly',false);
         }
-
     }
 
-    //$('#pixelBox').hidden = true;
+    // Populate Projection Dropdown
+    var projselect = $('#projselect');
+    for(i=0;i<projections.length;i++){
+        projselect.append('<option value="' + i.toString() + '">' + projections[i].name + '</option>');
+    }
+    projselect.append('<option value="' + i.toString() + '">Custom</option>');
+    nprojections = projections.length;
+    populateProjection();
+    projselect.on("change",populateProjection);
+
+    function populateProjection() {
+        var currentval = projselect.val();
+
+        if (parseFloat(currentval) !== nprojections) {
+            $('#projString').val(projections[currentval].str);
+            $('#projString').prop('readOnly', true);
+            $('#projstrdiv').hide();
+        }
+        else {
+            $('#projString').val('<enter proj4 String>');
+            $('#projString').prop('readOnly', false);
+            $('#projstrdiv').show();
+        }
+    }
+
+    // DO ONCE
+    updateSettings();
+    colorChange();
+    $('#pixelBox').hide();
+    $('').hide();
+    //
+    function colorChange(){
+        $('.camera').css('color',$('#colorCamera').val());
+        $('.target').css('color',$('#colorLookAt').val());
+        myCamera.footprintpolygon.setStyle({color: $('#colorFootprintLine').val()});
+        myCamera.footprintpolygon.setStyle({fillColor: $('#colorFootprintFill').val()});
+        myCamera.footprintpolygon.setStyle({weight: $('#lineWeight').val()});
+        myCamera.footprintpolygon.setStyle({fillOpacity: $('#fillOpacity').val()});
+    }
 
     function updateMap(){
         myCamera.IO.cx = $('#inputHorizontalPixels').val()/2;
@@ -296,24 +348,47 @@
         $('#inputVerticalPixels').val(myCamera.IO.cy*2);
         $('#inputFocal').val(myCamera.IO.f);
 
-        $('#inputRoll').val(Math.round(myCamera.EO.roll * 180/ Math.PI*100)/100);
-        $('#inputPitch').val(Math.round(myCamera.EO.pitch * 180/Math.PI*100)/100);
-        $('#inputYaw').val(Math.round(myCamera.EO.yaw * 180/ Math.PI*100)/100);
+        $('#inputRoll').val((myCamera.EO.roll * 180/ Math.PI).toFixed(2));
+        $('#inputPitch').val((myCamera.EO.pitch * 180/Math.PI).toFixed(2));
+        var myYaw = myCamera.EO.yaw * 180/ Math.PI;
+        if (myYaw<0){myYaw = myYaw + 360;}
+        $('#inputYaw').val(myYaw.toFixed(2));
 
         $('#inputLat').val(Math.round(myCamera.EO.lat * 100000)/100000);
         $('#inputLon').val(Math.round(myCamera.EO.lng * 100000)/100000);
         $('#inputAlt').val(myCamera.EO.Zc);
 
-        // Get Marker Coords
+        // Check valid proj4
+        projTo = $('#projString').val();
+        try {
+            var xy = proj4(leafletproj, projTo, [myCamera.EO.lng, myCamera.EO.lat]);
+            validproj4 = true;
+        }
+        catch {
+            validproj4 = false;
+        }
 
-        // Get Look At Coords
-
+        // Fill Projection X Y if valid
+        if (validproj4){
+            $('#showX').val(numberWithCommas(xy[0].toFixed(1)));
+            $('#showY').val(numberWithCommas(xy[1].toFixed(1)));
+        }
+        else{
+            $('#showX').val('');
+            $('#showY').val('');
+        }
     }
 
     function updatecursorpos(){
         var str='';
-        str = "Lon: " + cursor.lon.toString() + " Lat: " + cursor.lat.toString();
-        $('#coordboxCursorText').text(str);
+        if (validproj4){
+            var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
+            str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
+
+            str = str + "<br>";
+        }
+        str = str + "Lon: " + deg_to_dms(cursor.lon) + " Lat: " + deg_to_dms(cursor.lat);
+        $('#cursorBox').html(str);
     }
 
 </script>
