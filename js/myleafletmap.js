@@ -2,7 +2,6 @@
 var grayscale = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png'),
     esri   = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
 
-
 var mymap = L.map('mapid', {
     center: [44.56576, -123.27888],
     zoom: 16,
@@ -35,3 +34,14 @@ mymap.addEventListener('mousemove', function(ev) {
     cursor.lon = ev.latlng.lng;
     updatecursorpos();
 });
+function updatecursorpos(){
+    var str='';
+    if (validproj4){
+        var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
+        str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
+
+        str = str + "<br>";
+    }
+    str = str + "Lon: " + deg_to_dms(cursor.lon) + " Lat: " + deg_to_dms(cursor.lat);
+    $('#cursorBox').html(str);
+}

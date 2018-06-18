@@ -17,7 +17,8 @@
     <link rel="stylesheet" href="libs/bootstrap-4.1.1-dist/css/bootstrap.css"/>
     <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
     <link rel="stylesheet" href="css/main.css"/>
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
     <script src="libs/jscolor-2.0.5/jscolor.js"></script>
 </head>
 <body>
@@ -82,7 +83,7 @@
             <div class="form-group row">
                 <label for="inputRoll" class="col-6 col-form-label">Roll (deg)</label>
                 <div class="col-6">
-                    <input class="form-control eoio" type="number" value="0" min="0" id="inputRoll">
+                    <input class="form-control eoio" type="number" value="0" min="-89" max="89" id="inputRoll">
                 </div>
             </div>
             <div class="form-group row">
@@ -221,13 +222,19 @@
     <!-- Page Content -->
     <div id="content">
         <div id="settingsbtndiv">
-            <button id="settingsbtn" onclick="toggleSettings()"> <span class="fa fa-cog fa-2x"></span> </button>
+            <button id="settingsbtn" onclick="toggleSettings()"> <span class="fas fa-cog fa-2x"></span> </button>
         </div>
-
-        <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fa fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
+        <div id="clonebtndiv">
+            <button id="clonebtn" onclick="dostamp()"> <span class="fas fa-clone fa-2x"></span> </button>
+        </div>
+        <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fab fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
         <div id="coordinateBox">
             <a id="cursorBox"></a>
+        </div>
+
+        <div id="pixelBox">
+
         </div>
 
         <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
@@ -247,9 +254,9 @@
                     <h5>Project</h5>
                     <p>
                         This project depicts the footprint of an orthophoto taken from an aerial camera, which can be utilized to do mission planning with UAS.
-                        The photogrammetric equations use a pinhole camera, with the assumption that altitude is the height above a flat plane with no curvature.
+                        The photogrammetric equations use a pinhole camera model, with the assumption that altitude is the height above a flat plane with no curvature.
                         <br>
-                        <i class="fa fa-github hyp"></i> <a class="hyp" href="https://github.com/hokiespurs/uasortho">More information</a>.
+                        <i class="fab fa-github hyp"></i> <a class="hyp" href="https://github.com/hokiespurs/uasortho">More information</a>.
                     </p>
                     <hr>
                     <h5>Attribution</h5>
@@ -289,19 +296,26 @@
 <script src="libs/popper/popper.js"></script>
 <script src="libs/math/math.min.js"></script>
 <script src="libs/proj4js-2.4.3/proj4.js"></script>
-<script src="js/sidebar.js"></script>
-<script src="js/photogrammetry.js"></script>
-<script src="js/myleafletmap.js"></script>
-<script src="assets/cameras.js"></script>
-<script src="assets/locations.js"></script>
-<script src="assets/projections.js"></script>
+<script src="libs/d3/d3.min.js"></script>
 
 <script>
     // GLOBALS
     var validproj4 = true;
     const leafletproj = 'WGS84';
     var projTo = '';
+    var allStamps = Array();
+</script>
 
+<script src="js/sidebar.js"></script>
+<script src="js/photogrammetry.js"></script>
+<script src="js/myleafletmap.js"></script>
+<script src="js/stampFootprint.js"></script>
+<script src="assets/cameras.js"></script>
+<script src="assets/locations.js"></script>
+<script src="assets/projections.js"></script>
+
+
+<script>
     // Update Functions
     $('.eoio').on("change",updateMap);
     $('.eoio').on("click",updateMap);
@@ -364,7 +378,7 @@
     updateSettings();
     colorChange();
     $('#pixelBox').hide();
-    $('').hide();
+
     //
     function colorChange(){
         $('.camera').css('color',$('#colorCamera').val());
@@ -378,7 +392,7 @@
     function updateMap(){
         myCamera.IO.cx = $('#inputHorizontalPixels').val()/2;
         myCamera.IO.cy = $('#inputVerticalPixels').val()/2;
-        myCamera.IO.f = $('#inputFocal').val();
+        myCamera.IO.f = parseFloat($('#inputFocal').val());
         myCamera.IO.totpixx = myCamera.IO.cx*2;
         myCamera.IO.totpixy = myCamera.IO.cy*2;
         myCamera.IO.recalc();
@@ -387,9 +401,9 @@
         myCamera.EO.pitch = $('#inputPitch').val() * Math.PI/180;
         myCamera.EO.yaw = $('#inputYaw').val() * Math.PI/180;
 
-        myCamera.EO.lat = $('#inputLat').val();
-        myCamera.EO.lng = $('#inputLon').val();
-        myCamera.EO.Zc = $('#inputAlt').val();
+        myCamera.EO.lat = parseFloat($('#inputLat').val());
+        myCamera.EO.lng = parseFloat($('#inputLon').val());
+        myCamera.EO.Zc = parseFloat($('#inputAlt').val());
 
         myCamera.EO.calcUTM();
         myCamera.EO.calcRT();
@@ -432,18 +446,6 @@
             $('#showX').val('');
             $('#showY').val('');
         }
-    }
-
-    function updatecursorpos(){
-        var str='';
-        if (validproj4){
-            var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
-            str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
-
-            str = str + "<br>";
-        }
-        str = str + "Lon: " + deg_to_dms(cursor.lon) + " Lat: " + deg_to_dms(cursor.lat);
-        $('#cursorBox').html(str);
     }
 
 </script>

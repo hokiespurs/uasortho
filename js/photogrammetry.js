@@ -202,6 +202,8 @@ class Camera {
 
         this.footprintpolygon=new L.Polygon(this.footprint,{color:'#5cb85c', weight: 5});
 
+        this.gsdpolygons = this.makeGSDpolygons(9,100);
+
         //this.gsdResolutionPolygons=0;
         //this.cameraHorizonView=0;
 
@@ -325,10 +327,10 @@ class Camera {
         // |           |
         // [ 3       2 ]
 
-        var pix_of_corners = [[this.IO.totpixx, 1],
-            [this.IO.totpixx, this.IO.totpixy],
-            [1, this.IO.totpixy],
-            [1, 1]];
+        var pix_of_corners = [[this.IO.totpixx+0.5, 0.5],
+            [this.IO.totpixx+0.5, this.IO.totpixy+0.5],
+            [0.5, this.IO.totpixy+0.5],
+            [0.5, 0.5]];
 
         var el_of_corners = Array(4);
 
@@ -347,7 +349,13 @@ class Camera {
         return pixellist;
     }
 
-
+    calcLLpt(pixx,pixy) {
+        var uvs = uv2xyconstz(pixx,pixy,this.P);
+        if (uvs[2]>0) {
+            return calcUTM2LL(uvs[0],uvs[1],this.EO.zone,this.EO.band);
+        }
+        return [0,0];
+    }
 
     calcfootprint() {
         var band = this.EO.band;
@@ -394,6 +402,10 @@ class Camera {
         this.centermarker.addTo(mapname);
         this.uasmarker.addTo(mapname);
         this.footprintpolygon.addTo(mapname);
+        for(var i=0;i<this.gsdpolygons.length;i++){
+            this.gsdpolygons[i].addTo(mapname);
+        }
+        this.mapname = mapname;
     }
     updateUasMarker() {
         this.uasmarker.setLatLng([this.EO.lat,this.EO.lng]);
@@ -412,12 +424,44 @@ class Camera {
         this.footprintpolygon.redraw();
     }
 
-    updateCameraHorizonView(){
-        return 0;
+    sameK(K){
+        var isgood = true;
+        isgood = isgood && K[0][0]===this.IO.K[0][0];
+        isgood = isgood && K[0][2]===this.IO.K[0][2];
+        isgood = isgood && K[1][2]===this.IO.K[1][2];
+
+        return isgood
+    }
+    redoPolygons(){
+        // remove polygons from map
+        for(var i=0;i<this.gsdpolygons.length;i++){
+            this.mapname.removeLayer(this.gsdpolygons[i]);
+        }
+        this.gsdpolygons.length = 0;
+        // make new polygons
+        let NY = this.gsdpolygons.NY;
+        let pixplot = this.gsdpolygons.pixplot;
+        this.gsdpolygons = this.makeGSDpolygons(NY,pixplot);
+        // add them to map
+        for(var i=0;i<this.gsdpolygons.length;i++){
+            this.gsdpolygons[i].addTo(this.mapname);
+        }
     }
 
     updateGsdResolutionPolygons(){
-        return 0;
+        // determine if needs redoing
+
+        if (!this.sameK(this.gsdpolygons.K)) {
+            this.redoPolygons();
+        }
+
+        var padval = this.gsdpolygons.padval;
+        for (var i = 0; i < this.gsdpolygons.length; i++) {
+            var xpix = this.gsdpolygons[i].xpix;
+            var ypix = this.gsdpolygons[i].ypix;
+            this.gsdpolygons[i].setLatLngs(this.getCoords(xpix, ypix, padval));
+            this.gsdpolygons[i].redraw();
+        }
     }
 
     updateAll(){
@@ -426,9 +470,77 @@ class Camera {
         this.updateUasMarker();
         this.updateCenterMarker();
         this.updateFootprintPolygon();
-        this.updateCameraHorizonView();
         this.updateGsdResolutionPolygons();
         updateSettings();
+    }
+
+    makeGSDpolygons(NY,pixplot){
+        let XPIX = this.IO.cx*2;
+        let YPIX = this.IO.cy*2;
+
+        let pixsize = (YPIX-1)/NY;
+        let pixsizex = (XPIX-1)/(Math.floor((XPIX-1)/pixsize));
+
+        var xpix = Array();
+        var ypix = Array();
+        for (var j = 1+pixsize/2; j <= YPIX-pixsize/2; j+=pixsize) {
+            // add that -0.5 because of rounding errors, and this should catch it pretty robustly
+            for (var i = 1+pixsizex/2; i-0.5 <= XPIX-pixsizex/2; i+=pixsizex) {
+
+                xpix.push(i);
+                ypix.push(j);
+            }
+        }
+        var polygons = this.leafletgrid(xpix,ypix,pixplot);
+        polygons.NY = NY;
+        polygons.pixplot = pixplot;
+        return polygons
+    }
+    getCoords(xpix,ypix,padval){
+        var LL1 = this.calcLLpt(xpix - padval, ypix - padval);
+        var LL2 = this.calcLLpt(xpix + padval, ypix - padval);
+        var LL3 = this.calcLLpt(xpix + padval, ypix + padval);
+        var LL4 = this.calcLLpt(xpix - padval, ypix + padval);
+        if (LL1[0]===0 || LL1[1]===0 || LL1[2]===0 || LL1[3]===0){
+            return [[0,0], [0,0], [0,0], [0,0]];
+        }
+        return [LL1, LL2, LL3, LL4];
+    }
+
+    leafletgrid(xpix,ypix,npix){
+        // mymap._initPathRoot();
+        //
+        // /* We simply pick up the SVG from the map object */
+        // var svg = d3.select("#mapid").select("svg"),
+        //     g = svg.append("g");
+        let padval = 0.5 + npix;
+        var mypolygon = Array();
+        var i;
+        for(i=0;i<xpix.length;i++) {
+            var coords = this.getCoords(xpix[i],ypix[i],padval);
+            mypolygon[i] = new L.Polygon(coords, {color: 'black', weight: 1,zIndexOffset: 1000});
+            mypolygon[i].xpix = xpix[i];
+            mypolygon[i].ypix = ypix[i];
+            mypolygon[i].on({
+                mouseover: function(e){
+                    var layer = e.target;
+                    layer.setStyle({
+                        //color: 'magenta',
+                        weight: 2,
+                    })
+                },
+                mouseout: function(e){
+                    var layer = e.target;
+                    layer.setStyle({
+                        //color: 'magenta',
+                        weight: 1,
+                    })
+                }
+            });
+        }
+        mypolygon.padval = padval;
+        mypolygon.K = this.IO.K;
+        return mypolygon
     }
 }
 
@@ -444,7 +556,6 @@ function uv2xyconstz(pixx,pixy,P){
 function xyz2uvs(x,y,z,P){
 
 }
-
 
 function calcUTM2LL(x,y,zone,band){
     return L.utm({x: x, y: y, zone: zone, band: band}).latLng();
