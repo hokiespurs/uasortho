@@ -32,16 +32,16 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     z-index: 3;
 }
 #clonebtndiv{
     position: absolute;
     top: 10px;
-    left: 70px;
-    width: 30px;
-    height: 30px;
+    left: 90px;
+    width: 40px;
+    height: 40px;
     z-index: 3;
 }
 .modal-header-success {

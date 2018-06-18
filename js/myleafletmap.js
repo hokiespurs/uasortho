@@ -1,19 +1,26 @@
-// Create variable to hold map element, give initial settings to map
-var grayscale = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png'),
-    esri   = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{
+    maxNativeZoom: 19,
+    maxZoom: 23
+});
+
+var arcgis = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+    maxNativeZoom: 21,
+    maxZoom: 23
+});
 
 var mymap = L.map('mapid', {
-    center: [44.56576, -123.27888],
-    zoom: 16,
+    center: [44.566142496389155, -123.273],
+    zoom: 18,
+    maxZoom: 23,
     detectRetina: true, // detect whether the sceen is high resolution or not.
     attributionControl: false,
     zoomControl: false,
-    layers: [grayscale, esri]
+    layers: [osm, arcgis]
 });
 
 var baseMaps = {
-    "Grayscale": grayscale,
-    "ESRI World": esri
+    "Satellite": arcgis,
+    "Open Street Map": osm
 };
 
 L.control.layers(baseMaps).addTo(mymap);
@@ -24,7 +31,7 @@ L.control.layers(baseMaps).addTo(mymap);
 // add Camera
 var myCamera = new Camera(
     new IO(4000,4000,3000,'test'),
-    new EO(44.566142496389155, -123.2718586921692, 120, 0*Math.PI/180, 60*Math.PI/180, 270*Math.PI/180));
+    new EO(44.566142496389155, -123.2718586921692, 120, 0*Math.PI/180, 40*Math.PI/180, 270*Math.PI/180));
 
 myCamera.addtomap(mymap);
 
@@ -37,11 +44,29 @@ mymap.addEventListener('mousemove', function(ev) {
 function updatecursorpos(){
     var str='';
     if (validproj4){
-        var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
-        str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
+        try {
+            var xy = proj4(leafletproj, projTo, [cursor.lon, cursor.lat]);
+            str = "X: " + numberWithCommas(xy[0].toFixed(1)) + " Y: " + numberWithCommas(xy[1].toFixed(1));
 
-        str = str + "<br>";
+            str = str + "<br>";
+        }
+        catch {
+            console.log('proj4 error in update cursor()');
+            // sometimes and error is thrown while things are loading
+        }
     }
     str = str + "Lon: " + deg_to_dms(cursor.lon) + " Lat: " + deg_to_dms(cursor.lat);
     $('#cursorBox').html(str);
+}
+
+function movecamerahere(){
+    myCamera.EO.lat = mymap.getCenter().lat;
+    myCamera.EO.lng = mymap.getCenter().lng;
+
+    myCamera.EO.calcUTM();
+    myCamera.EO.calcRT();
+
+    myCamera.updateAll();
+
+    updateSettings();
 }

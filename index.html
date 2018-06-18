@@ -26,22 +26,46 @@
 
 <div class="wrapper">
     <!-- BOOTSTRAP HEADER -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light py-0" style="z-index:100;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-0" style="z-index:100;">
         <img src="img/logo.png"  height="50px" class="d-inline-block align-top">
         <div class="d-flex justify-content-left nav-item">
             <span class="navbar-text"><h2> &nbsp;UAS Ortho &nbsp;&nbsp;&nbsp;&nbsp;</h2></span>
         </div>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a id="navbtnSettings" class="nav-item nav-link" href="#">Settings <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link disabled" href="#">Tools</a>
-                <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#infomodal">About</a>
-                <a class="nav-item nav-link disabled" href="#">Help</a>
-            </div>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="navbtnSettings">Settings</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Tools
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Center on Camera</a>
+                        <a class="dropdown-item" href="#">Move Camera Here</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Stamp Footprint</a>
+                        <a class="dropdown-item" href="#">Clear Stamps</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="modal" data-target="#infomodal">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Help</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
         </div>
+
 
     </nav>
     <!-- Sidebar -->
@@ -165,13 +189,13 @@
             <div class="form-group row">
                 <label for="colorFootprintLine" class="col-6 col-form-label">Footprint Line</label>
                 <div class="col-6">
-                    <input class="form-control jscolor {hash:true}" value="#F58820" id="colorFootprintLine" onchange="colorChange();" disabled>
+                    <input class="form-control jscolor {hash:true}" value="#000000" id="colorFootprintLine" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="colorFootprintFill" class="col-6 col-form-label">Footprint Fill</label>
                 <div class="col-6">
-                    <input class="form-control jscolor {hash:true}" value="#F58820" id="colorFootprintFill" onchange="colorChange();" disabled>
+                    <input class="form-control jscolor {hash:true}" value="#FFFFFF" id="colorFootprintFill" onchange="colorChange();" disabled>
                 </div>
             </div>
             <div class="form-group row">
@@ -188,53 +212,87 @@
             </div>
         </div>
 
-        <!-- Colorbar --
-        <button class="accordion">Colorbar</button>
+        <!-- GSD  -->
+        <button class="accordion">GSD Colormap</button>
         <div id="colorbarGroup" class="panel">
 
             <div class="form-group row">
                 <label for="selectscalar" class="col-4 col-form-label">Scalar</label>
                 <div class="col-8">
-                    <select class="form-control" id="selectscalar" name="Scalar">
-                        <option value="A">None</option>
-                        <option value="B">GSD</option>
-                        <option value="C">GSD Ratio</option>
+                    <select class="form-control" id="selectscalar" name="Scalar" onclick="updateGSD();" onchange="updateGSD();">
+                        <option value="none">None</option>
+                        <option value="gsdx">Horizontal GSD</option>
+                        <option value="gsdy" selected>Vertical GSD</option>
+                        <option value="stretch">Pixel Stretch</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group row">
-                <label for="inputCmin" class="col-6 col-form-label">Minimum</label>
-                <div class="col-6">
-                    <input class="form-control" type="number" value="0" min="0" id="inputCmin">
+                <label for="selectcmap" class="col-4 col-form-label">Colormap</label>
+                <div class="col-8">
+                    <select class="form-control" id="selectcmap" name="Scalar" onchange="updateGSD();" onclick="updateGSD();">
+                        <option value="jet">Jet</option>
+                        <option value="parula">Parula</option>
+                    </select>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="inputCmax" class="col-6 col-form-label">Maximum</label>
+                <label for="inputCmin" class="col-6 col-form-label">Minimum (m)</label>
                 <div class="col-6">
-                    <input class="form-control" type="number" value="20" min="0" id="inputCmax">
+                    <input class="form-control" type="number" value="0" min="0" step="0.01" id="inputCmin" onchange="updateGSD();">
                 </div>
             </div>
-            -->
+
+            <div class="form-group row">
+                <label for="inputCmax" class="col-6 col-form-label">Maximum (m)</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="0.1" min="0" step="0.01" id="inputCmax" onchange="updateGSD();">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="gsdopacity" class="col-6 col-form-label">Fill Opacity</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="0.75" step="0.1" min="0" max="1" id="gsdopacity" onchange="updateGSD();">
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- GSD Plot Geometry -->
+        <button class="accordion">GSD Plot Geometry</button>
+        <div id="gsdGroup" class="panel">
+            <div class="form-group row">
+                <label for="gsdny" class="col-6 col-form-label"># to Plot in Y</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="9" step="1" min="0" max="199" id="gsdny" onchange="updateGSDplot();">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="gsdpixplot" class="col-6 col-form-label">GSD Box (px)</label>
+                <div class="col-6">
+                    <input class="form-control" type="number" value="100" step="5" min="1" id="gsdpixplot" onchange="updateGSDplot();">
+                </div>
+            </div>
         </div>
 
     </div>
     <!-- Page Content -->
     <div id="content">
         <div id="settingsbtndiv">
-            <button id="settingsbtn" onclick="toggleSettings()"> <span class="fas fa-cog fa-2x"></span> </button>
+            <button id="settingsbtn" onclick="toggleSettings()" style="border-radius: 8px;"> <span class="fas fa-cog fa-2x"></span> </button>
         </div>
         <div id="clonebtndiv">
-            <button id="clonebtn" onclick="dostamp()"> <span class="fas fa-clone fa-2x"></span> </button>
+            <button id="clonebtn" onclick="dostamp()" style="border-radius: 8px;"> <span class="fas fa-clone fa-2x"></span> </button>
         </div>
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fab fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
         <div id="coordinateBox">
             <a id="cursorBox"></a>
-        </div>
-
-        <div id="pixelBox">
-
         </div>
 
         <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
@@ -310,6 +368,7 @@
 <script src="js/photogrammetry.js"></script>
 <script src="js/myleafletmap.js"></script>
 <script src="js/stampFootprint.js"></script>
+
 <script src="assets/cameras.js"></script>
 <script src="assets/locations.js"></script>
 <script src="assets/projections.js"></script>
@@ -377,7 +436,7 @@
     // DO ONCE
     updateSettings();
     colorChange();
-    $('#pixelBox').hide();
+    updateGSD();
 
     //
     function colorChange(){
@@ -387,6 +446,18 @@
         myCamera.footprintpolygon.setStyle({fillColor: $('#colorFootprintFill').val()});
         myCamera.footprintpolygon.setStyle({weight: $('#lineWeight').val()});
         myCamera.footprintpolygon.setStyle({fillOpacity: $('#fillOpacity').val()});
+    }
+
+    function updateGSD(){
+        myCamera.setgsdminmax = [$('#inputCmin').val() , $('#inputCmax').val()];
+        myCamera.setgsdscalar = $('#selectscalar').val();
+        myCamera.setgsdopacity = $('#gsdopacity').val();
+        myCamera.setgsdcmap = $('#selectcmap').val();
+    }
+
+    function updateGSDplot(){
+        myCamera.setgsdNY = parseFloat($('#gsdny').val());
+        myCamera.setgsdPix = parseFloat($('#gsdpixplot').val());
     }
 
     function updateMap(){

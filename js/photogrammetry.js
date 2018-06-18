@@ -202,15 +202,54 @@ class Camera {
 
         this.footprintpolygon=new L.Polygon(this.footprint,{color:'#5cb85c', weight: 5});
 
+        this.NY = 9;
+        this.gsdpix = 100;
+
+        this.scalar = Array();
+        this.scalar.minval = 0;
+        this.scalar.maxval = 1;
+        this.scalar.scalarfield = 'gsdy';
+        this.scalar.cmap2use = 'jet';
+        this.scalar.opacity = 0.75;
         this.gsdpolygons = this.makeGSDpolygons(9,100);
 
+
+        this.calcGSDscalar();
         //this.gsdResolutionPolygons=0;
         //this.cameraHorizonView=0;
 
     }
     //SETTER
+    set setgsdNY(NY){
+        this.NY = NY;
+        this.redoPolygons();
+        this.colorPolygons();
+    }
+    set setgsdPix(pix){
+        this.gsdpix = pix;
+        this.redoPolygons();
+        this.colorPolygons();
+    }
+    set setgsdminmax(minmax){
+        this.scalar.minval = minmax[0];
+        this.scalar.maxval = minmax[1];
+        this.colorPolygons();
+    }
+    set setgsdcmap(cmap2use){
+        this.scalar.cmap2use = cmap2use;
+        this.colorPolygons();
+    }
+    set setgsdscalar(scalar2use){
+        this.scalar.scalarfield = scalar2use;
+        this.colorPolygons();
+    }
+    set setgsdopacity(opacity2use){
+        this.scalar.opacity = opacity2use;
+        this.colorPolygons();
+    }
     set setXYZ(xyz){
         this.EO.setXcYcZc(xyz);
+        this.updateAll();
     }
 
     set setLL(latlng){
@@ -350,9 +389,11 @@ class Camera {
     }
 
     calcLLpt(pixx,pixy) {
-        var uvs = uv2xyconstz(pixx,pixy,this.P);
-        if (uvs[2]>0) {
-            return calcUTM2LL(uvs[0],uvs[1],this.EO.zone,this.EO.band);
+        var xys = uv2xyconstz(pixx,pixy,this.P);
+        if (xys[2]>0) {
+            var LL = calcUTM2LL(xys[0],xys[1],this.EO.zone,this.EO.band);
+            if (LL==null){LL=[0,0];}
+            return LL;
         }
         return [0,0];
     }
@@ -405,6 +446,7 @@ class Camera {
         for(var i=0;i<this.gsdpolygons.length;i++){
             this.gsdpolygons[i].addTo(mapname);
         }
+        this.colorPolygons();
         this.mapname = mapname;
     }
     updateUasMarker() {
@@ -441,17 +483,18 @@ class Camera {
         // make new polygons
         let NY = this.gsdpolygons.NY;
         let pixplot = this.gsdpolygons.pixplot;
-        this.gsdpolygons = this.makeGSDpolygons(NY,pixplot);
+        this.gsdpolygons = this.makeGSDpolygons(this.NY,this.gsdpix);
         // add them to map
         for(var i=0;i<this.gsdpolygons.length;i++){
             this.gsdpolygons[i].addTo(this.mapname);
         }
+        this.calcGSDscalar();
     }
 
     updateGsdResolutionPolygons(){
         // determine if needs redoing
 
-        if (!this.sameK(this.gsdpolygons.K)) {
+        if (!this.sameK(this.gsdpolygons.K) || this.gsdpolygons.NY !== this.NY || this.gsdpolygons.pixplot !== this.gsdpix) {
             this.redoPolygons();
         }
 
@@ -461,7 +504,9 @@ class Camera {
             var ypix = this.gsdpolygons[i].ypix;
             this.gsdpolygons[i].setLatLngs(this.getCoords(xpix, ypix, padval));
             this.gsdpolygons[i].redraw();
+            this.calcGSDscalar();
         }
+        this.colorPolygons();
     }
 
     updateAll(){
@@ -473,6 +518,69 @@ class Camera {
         this.updateGsdResolutionPolygons();
         updateSettings();
     }
+    colorPolygons(){
+        for(var i=0;i<this.gsdpolygons.length;i++){
+
+            var val;
+            var mycolor;
+            var myopacity = this.scalar.opacity;
+            if (this.scalar.scalarfield === 'gsdx'){
+                val = this.gsdpolygons[i].scalars.gsdx;
+                mycolor = colorval(val,this.scalar.minval,this.scalar.maxval,this.scalar.cmap2use);
+            }
+            else if (this.scalar.scalarfield === 'gsdy'){
+                val = this.gsdpolygons[i].scalars.gsdy;
+                mycolor = colorval(val,this.scalar.minval,this.scalar.maxval,this.scalar.cmap2use);
+            }
+            else if (this.scalar.scalarfield === 'stretch'){
+                val = this.gsdpolygons[i].scalars.stretch;
+                mycolor = colorval(val,this.scalar.minval,this.scalar.maxval,this.scalar.cmap2use);
+            }
+            else {
+                mycolor = '#000000';
+            }
+
+
+            this.gsdpolygons[i].setStyle({fillColor: mycolor, fillOpacity: myopacity});
+
+        }
+    }
+    calcGSDscalar(){
+        // [ 4       1 ]
+        // |           | Pixel corners in this order
+        // |           |
+        // [ 3       2 ]
+        let padval = this.gsdpolygons.padval;
+        for (var i = 0; i < this.gsdpolygons.length; i++) {
+            var xpix = this.gsdpolygons[i].xpix;
+            var ypix = this.gsdpolygons[i].ypix;
+
+            var XY1 = uv2xyconstz(xpix + padval + 0.5, ypix - padval - 0.5, this.P);
+            var XY2 = uv2xyconstz(xpix + padval + 0.5, ypix + padval + 0.5, this.P);
+            var XY3 = uv2xyconstz(xpix - padval - 0.5, ypix + padval + 0.5, this.P);
+            var XY4 = uv2xyconstz(xpix - padval - 0.5, ypix - padval - 0.5, this.P);
+
+            this.gsdpolygons[i].scalars = Array();
+
+            let gsdx = Math.max(calcDist(XY1,XY4),calcDist(XY2,XY3)) / (1 + 2 * padval);
+            let gsdy = Math.max(calcDist(XY1,XY2),calcDist(XY3,XY4)) / (1 + 2 * padval);
+            let stretch = Math.max(gsdx/gsdy, gsdy/gsdx);
+
+            this.gsdpolygons[i].scalars.gsdx    = gsdx;
+            this.gsdpolygons[i].scalars.gsdy    = gsdy;
+            this.gsdpolygons[i].scalars.stretch = stretch;
+
+            var popupstr = "<table border=\"1\" style='width:100%'";
+            popupstr = popupstr + "<tr><td>Pixels: </td><td align=\"right\">" + padval.toFixed(0) + " x " + padval.toFixed(0) + "</td></tr>";
+            popupstr = popupstr + "<tr><td>Center Pixel: </td><td align=\"right\">(" + xpix.toFixed(0) + "," + ypix.toFixed(0) + ")</td></tr>";
+            popupstr = popupstr + "<tr><td>Avg Horizontal GSD: </td><td align=\"right\">" + gsdx.toFixed(2) + "m</td></tr>";
+            popupstr = popupstr + "<tr><td>Avg Vertical GSD: </td><td align=\"right\">" + gsdy.toFixed(2) + "m</td></tr>";
+            popupstr = popupstr + "<tr><td>Avg Pixel Stretch: </td><td align=\"right\">" + stretch.toFixed(2) + "</td></tr>";
+
+            this.gsdpolygons[i]._popup.setContent(popupstr);
+            this.gsdpolygons[i]._popup._close()
+        }
+    }
 
     makeGSDpolygons(NY,pixplot){
         let XPIX = this.IO.cx*2;
@@ -483,7 +591,7 @@ class Camera {
 
         var xpix = Array();
         var ypix = Array();
-        for (var j = 1+pixsize/2; j <= YPIX-pixsize/2; j+=pixsize) {
+        for (var j = 1+pixsize/2; j-0.5 <= YPIX-pixsize/2; j+=pixsize) {
             // add that -0.5 because of rounding errors, and this should catch it pretty robustly
             for (var i = 1+pixsizex/2; i-0.5 <= XPIX-pixsizex/2; i+=pixsizex) {
 
@@ -496,11 +604,13 @@ class Camera {
         polygons.pixplot = pixplot;
         return polygons
     }
+
     getCoords(xpix,ypix,padval){
         var LL1 = this.calcLLpt(xpix - padval, ypix - padval);
         var LL2 = this.calcLLpt(xpix + padval, ypix - padval);
         var LL3 = this.calcLLpt(xpix + padval, ypix + padval);
         var LL4 = this.calcLLpt(xpix - padval, ypix + padval);
+
         if (LL1[0]===0 || LL1[1]===0 || LL1[2]===0 || LL1[3]===0){
             return [[0,0], [0,0], [0,0], [0,0]];
         }
@@ -513,7 +623,7 @@ class Camera {
         // /* We simply pick up the SVG from the map object */
         // var svg = d3.select("#mapid").select("svg"),
         //     g = svg.append("g");
-        let padval = 0.5 + npix;
+        let padval = 0.5 + npix-1;
         var mypolygon = Array();
         var i;
         for(i=0;i<xpix.length;i++) {
@@ -537,6 +647,11 @@ class Camera {
                     })
                 }
             });
+            let popup = L.popup({
+                closeOnClick: false,
+                autoClose: false
+            })
+            mypolygon[i].bindPopup(popup);
         }
         mypolygon.padval = padval;
         mypolygon.K = this.IO.K;
@@ -570,7 +685,6 @@ function rad2deg(x){
 function deg2rad(x){
     return x*Math.PI/180;
 }
-
 function cart2sph(x,y,z){
     var rho = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
     var phi = Math.atan2(y, x) + Math.PI / 2;
@@ -599,4 +713,32 @@ function deg_to_dms (deg) {
         m=0;
     }
     return ("" + d + "&#176; " + m + "'" + s + '"');
+}
+
+function colorval(x,minval,maxval,cmapname){
+    var cmap;
+    if (cmapname ==='jet'){
+        cmap = ["#0000BF","#0000FF","#0040FF","#0080FF","#00BFFF","#00FFFF","#40FFBF","#80FF80","#BFFF40","#FFFF00","#FFBF00","#FF8000","#FF4000","#FF0000","#BF0000","#BF0000"];
+    }
+    else {
+        cmap = ["#3E26A8","#4538D7","#484FF2","#4367FD","#2F80FA","#2797EB","#1CAADF","#00B9C7","#29C3AA","#48CB86","#81CC59","#BBC42F","#EABA30","#FEC735","#F5E128","#F5E128"];
+    }
+
+    var m = (cmap.length)/(maxval-minval);
+    var b = -minval*m;
+
+    var y = m*x + b;
+
+    let ind = Math.round(y);
+    if (ind<0){
+        ind=0;
+    }
+    if (ind>cmap.length-1){
+        ind=cmap.length-1;
+    }
+
+    return cmap[ind];
+}
+function calcDist(P1,P2){
+    return ((P1[0]-P2[0])**2+(P1[1]-P2[1])**2)**0.5
 }

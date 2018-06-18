@@ -52,7 +52,9 @@ function stampFootprint(){
 
     popupstr = popupstr + "<tr><td>Roll: </td><td align=\"right\">" + (myCamera.EO.roll * 180/ Math.PI).toFixed(2) + "&#176;</td></tr>";
     popupstr = popupstr + "<tr><td>Pitch: </td><td align=\"right\">" + (myCamera.EO.pitch * 180/ Math.PI).toFixed(2) + "&#176;</td></tr>";
-    popupstr = popupstr + "<tr><td>Yaw: </td><td align=\"right\">" + (myCamera.EO.yaw * 180/ Math.PI).toFixed(2) + "&#176;</td></tr>";
+    var myYaw = myCamera.EO.yaw * 180/ Math.PI;
+    if (myYaw<0){myYaw = myYaw + 360;}
+    popupstr = popupstr + "<tr><td>Yaw: </td><td align=\"right\">" + myYaw.toFixed(2) + "&#176;</td></tr>";
 
     popupstr = popupstr + "</table>";
 
