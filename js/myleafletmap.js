@@ -19,8 +19,8 @@ var mymap = L.map('mapid', {
 });
 
 var baseMaps = {
-    "Satellite": arcgis,
-    "Open Street Map": osm
+    "Open Street Map": osm,
+    "Satellite": arcgis
 };
 
 L.control.layers(baseMaps).addTo(mymap);
