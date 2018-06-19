@@ -1,20 +1,20 @@
 let locations = [
   {
-    "name": "Oregon State",
-    "lon": "-120",
-    "lat": "44",
-    "zoom": "16"
+    "name": "Oregon State University, OR",
+    "lon": "-123.278911",
+    "lat": "44.565736",
+    "zoom": "17"
   },
   {
-    "name": "Test1",
-    "lon": "4000",
-    "lat": "4000",
-    "zoom": "16"
+    "name": "Agate Beach, OR",
+    "lon": "-124.061913",
+    "lat": "44.672863",
+    "zoom": "17"
   },
   {
-    "name": "Test1",
-    "lon": "4000",
-    "lat": "4000",
-    "zoom": "16"
+    "name": "South Beach State Park, OR",
+    "lon": "-124.069270",
+    "lat": "44.612903",
+    "zoom": "17"
   }
 ];

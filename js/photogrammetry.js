@@ -190,6 +190,16 @@ class Camera {
         });
         this.uasmarker.on("drag",this.uasmarkermoved,this);
 
+        this.uasmarker.on("dragstart",function(e){
+            this.NYhold = this.NY;
+            this.NY = 0;
+        },this);
+        this.uasmarker.on("dragend",function(e){
+            this.NY = this.NYhold;
+            this.redoPolygons();
+            this.colorPolygons();
+        },this);
+
         this.centermarker=new L.marker(this.centerpoint, {
             draggable: true,
             icon: L.divIcon({
@@ -199,10 +209,20 @@ class Camera {
             })
         });
         this.centermarker.on("drag",this.uastargetmoved,this);
+        this.centermarker.on("dragstart",function(e){
+            this.NYhold = this.NY;
+            this.NY = 0;
+        },this);
+        this.centermarker.on("dragend",function(e){
+            this.NY = this.NYhold;
+            this.redoPolygons();
+            this.colorPolygons();
+        },this);
 
         this.footprintpolygon=new L.Polygon(this.footprint,{color:'#5cb85c', weight: 5});
 
         this.NY = 9;
+        this.NYhold = 9;
         this.gsdpix = 100;
 
         this.scalar = Array();

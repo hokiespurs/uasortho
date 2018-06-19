@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
     <link rel="stylesheet" href="css/main.css"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="libs/jquery-ui-1.12.1/jquery-ui.min.css"/>
 
     <script src="libs/jscolor-2.0.5/jscolor.js"></script>
 </head>
 <body>
-
 
 <div class="wrapper">
     <!-- BOOTSTRAP HEADER -->
@@ -39,30 +39,30 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#" id="navbtnSettings">Settings</a>
+                    <a class="nav-link" href="#" id="navbtnSettings"><span class="fas fa-fw fa-cog"></span>Settings</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Tools
+                        <span class="fas fa-fw fa-wrench"></span>Tools
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Center on Camera</a>
-                        <a class="dropdown-item" href="#">Move Camera Here</a>
+                        <a class="dropdown-item" href="#" onclick="flytocamera()"><span class="fas fa-fw fa-home"></span> Center on Camera</a>
+                        <a class="dropdown-item" href="#" onclick="movecamerahere()"><span class="fas fa-fw fa-crosshairs"></span> Move Camera Here</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Stamp Footprint</a>
-                        <a class="dropdown-item" href="#">Clear Stamps</a>
+                        <a class="dropdown-item" href="#" onclick="dostamp()"><span class="fas fa-fw fa-clone"></span> Stamp Footprint</a>
+                        <a class="dropdown-item" href="#" onclick="clearstamps()"><span class="fas fa-fw fa-times"></span> Clear Stamps</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" data-toggle="modal" data-target="#infomodal">About</a>
+                    <a class="nav-link" href="#" data-toggle="modal" data-target="#infomodal"><span class="fas fa-fw fa-info-circle"></span>About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Help</a>
+                    <a class="nav-link" href="#"><span class="fas fa-fw fa-question-circle"></span>Help</a>
                 </li>
             </ul>
             <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="tags">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="flyToLocation()">Fly To</button>
             </form>
         </div>
 
@@ -238,6 +238,11 @@
                 </div>
             </div>
 
+            <div class="col-12">
+                <img src="img/parula.png" style="width: 100%;height:30px" id="colormapimage">
+            </div>
+            <br>
+
             <div class="form-group row">
                 <label for="inputCmin" class="col-6 col-form-label">Minimum (m)</label>
                 <div class="col-6">
@@ -284,10 +289,10 @@
     <!-- Page Content -->
     <div id="content">
         <div id="settingsbtndiv">
-            <button id="settingsbtn" onclick="toggleSettings()" style="border-radius: 8px;"> <span class="fas fa-cog fa-2x"></span> </button>
+            <button id="settingsbtn" onclick="toggleSettings()" style="border-radius: 8px;background-color: #343a40;color: #9a9da0" title="Toggle Settings Sidebar"> <span class="fas fa-fw fa-cog fa-2x"></span> </button>
         </div>
         <div id="clonebtndiv">
-            <button id="clonebtn" onclick="dostamp()" style="border-radius: 8px;"> <span class="fas fa-clone fa-2x"></span> </button>
+            <button id="clonebtn" onclick="dostamp()" style="border-radius: 8px;background-color: #343a40;color: #9a9da0" title="Stamp Footprint"> <span class="fas fa-fw fa-clone fa-2x"></span> </button>
         </div>
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fab fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
@@ -322,6 +327,7 @@
                         <li>The map is based on <a class="hyp" href="https://leafletjs.com/">leaflet</a></li>
                         <li>The layout utilizes <a class="hyp" href="https://getbootstrap.com/">Bootstrap</a></li>
                         <li>Coordinate conversions are handled with <a class="hyp" href="http://proj4js.org/">proj4js</a></li>
+                        <li><a class="hyp" href="https://jquery.com/">jQuery</a> and <a class="hyp" href="https://jqueryui.com/">jQuery-ui</a> are used to handle DOM lookups and the autocomplete search bar</li>
                     </ul>
                     <hr>
                     <h5>Author</h5>
@@ -355,6 +361,7 @@
 <script src="libs/math/math.min.js"></script>
 <script src="libs/proj4js-2.4.3/proj4.js"></script>
 <script src="libs/d3/d3.min.js"></script>
+<script src="libs/jquery-ui-1.12.1/jquery-ui.min.js"></script>
 
 <script>
     // GLOBALS
@@ -453,6 +460,12 @@
         myCamera.setgsdscalar = $('#selectscalar').val();
         myCamera.setgsdopacity = $('#gsdopacity').val();
         myCamera.setgsdcmap = $('#selectcmap').val();
+        if ($('#selectcmap').val()==='jet')
+            $('#colormapimage').attr('src',"img/jet.png");
+        else {
+            $('#colormapimage').attr('src',"img/parula.png");
+        }
+
     }
 
     function updateGSDplot(){
@@ -518,7 +531,37 @@
             $('#showY').val('');
         }
     }
+    function flyToLocation(){
+        var flytoval = $('#tags').val();
+        for(var i=0;i<locations.length;i++){
+            if(flytoval===locations[i].name){
+                myCamera.EO.lat = locations[i].lat;
+                myCamera.EO.lng = locations[i].lon;
 
+                myCamera.EO.calcUTM();
+                myCamera.EO.calcRT();
+
+                myCamera.updateAll();
+
+                updateSettings();
+
+                mymap.setView([myCamera.EO.lat,myCamera.EO.lng],locations[i].zoom);
+                break;
+            }
+        }
+    }
+</script>
+
+<script>
+    var locationnames=Array();
+    for(var i=0;i<locations.length;i++){
+        locationnames.push(locations[i].name);
+    }
+    $( function() {
+        $( "#tags" ).autocomplete({
+            source: locationnames
+        });
+    } );
 </script>
 
 </body>

@@ -70,3 +70,7 @@ function movecamerahere(){
 
     updateSettings();
 }
+
+function flytocamera(){
+    mymap.setView([myCamera.EO.lat,myCamera.EO.lng]);
+}
