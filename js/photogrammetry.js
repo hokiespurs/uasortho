@@ -582,8 +582,8 @@ class Camera {
 
             this.gsdpolygons[i].scalars = Array();
 
-            let gsdx = Math.max(calcDist(XY1,XY4),calcDist(XY2,XY3)) / (1 + 2 * padval);
-            let gsdy = Math.max(calcDist(XY1,XY2),calcDist(XY3,XY4)) / (1 + 2 * padval);
+            let gsdx = (calcDist(XY1,XY4)+calcDist(XY2,XY3)) / (1 + 2 * padval) / 2;
+            let gsdy = (calcDist(XY1,XY2)+calcDist(XY3,XY4)) / (1 + 2 * padval) / 2;
             let stretch = Math.max(gsdx/gsdy, gsdy/gsdx);
 
             this.gsdpolygons[i].scalars.gsdx    = gsdx;
