@@ -299,8 +299,9 @@
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fab fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
         <div id="colorbar">
-            <h3 id="colorbartitle" style="text-align: center;">Vertical GSD</h3>
-            <hr>
+            <div class="modal-header modal-header-colorbar">
+                <h4 class="modal-title" id="colorbartitle">Information</h4>
+            </div>
             <canvas id="cv" width="200px" height="250px"></canvas>
         </div>
 
@@ -507,7 +508,7 @@
         var TOTY = 225,
             WIDTH = 50,
             PADX = 50,
-            PADY = 10,
+            PADY = 20,
             DY = 1/15 * TOTY;
 
         if (cmapname ==='jet'){
