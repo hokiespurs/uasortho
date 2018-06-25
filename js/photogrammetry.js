@@ -231,6 +231,14 @@ class Camera {
         this.scalar.scalarfield = 'gsdy';
         this.scalar.cmap2use = 'jet';
         this.scalar.opacity = 0.75;
+
+        this.scalar.currentlims = Array();
+        this.scalar.currentlims.gsdx = [0, 1];
+        this.scalar.currentlims.gsdy = [0, 1];
+        this.scalar.currentlims.stretch = [0, 1];
+        this.scalar.currentmin = 0;
+        this.scalar.currentmax = 1;
+
         this.gsdpolygons = this.makeGSDpolygons(9,100);
 
 
@@ -560,16 +568,33 @@ class Camera {
                 mycolor = '#000000';
             }
 
-
             this.gsdpolygons[i].setStyle({fillColor: mycolor, fillOpacity: myopacity});
 
         }
+
+        if (this.scalar.scalarfield === 'gsdx'){
+            this.scalar.currentmin = this.scalar.currentlims.gsdx[0];
+            this.scalar.currentmax = this.scalar.currentlims.gsdx[1];
+        }
+        else if (this.scalar.scalarfield === 'gsdy'){
+            this.scalar.currentmin = this.scalar.currentlims.gsdy[0];
+            this.scalar.currentmax = this.scalar.currentlims.gsdy[1];
+        }
+        else if (this.scalar.scalarfield === 'stretch'){
+            this.scalar.currentmin = this.scalar.currentlims.stretch[0];
+            this.scalar.currentmax = this.scalar.currentlims.stretch[1];
+        }
+
     }
     calcGSDscalar(){
         // [ 4       1 ]
         // |           | Pixel corners in this order
         // |           |
         // [ 3       2 ]
+        this.scalar.currentlims.gsdx = [9999, -9999];
+        this.scalar.currentlims.gsdy = [9999, -9999];
+        this.scalar.currentlims.stretch = [9999, -9999];
+
         let padval = this.gsdpolygons.padval;
         for (var i = 0; i < this.gsdpolygons.length; i++) {
             var xpix = this.gsdpolygons[i].xpix;
@@ -589,6 +614,14 @@ class Camera {
             this.gsdpolygons[i].scalars.gsdx    = gsdx;
             this.gsdpolygons[i].scalars.gsdy    = gsdy;
             this.gsdpolygons[i].scalars.stretch = stretch;
+
+            if (this.scalar.currentlims.gsdx[0]>gsdx){this.scalar.currentlims.gsdx[0]=gsdx;}
+            if (this.scalar.currentlims.gsdy[0]>gsdy){this.scalar.currentlims.gsdy[0]=gsdy;}
+            if (this.scalar.currentlims.stretch[0]>stretch){this.scalar.currentlims.stretch[0]=stretch;}
+
+            if (this.scalar.currentlims.gsdx[1]<gsdx){this.scalar.currentlims.gsdx[1]=gsdx;}
+            if (this.scalar.currentlims.gsdy[1]<gsdy){this.scalar.currentlims.gsdy[1]=gsdy;}
+            if (this.scalar.currentlims.stretch[1]<stretch){this.scalar.currentlims.stretch[1]=stretch;}
 
             var popupstr = "<table border=\"1\" style='width:100%'";
             popupstr = popupstr + "<tr><td>Pixels: </td><td align=\"right\">" + padval.toFixed(0) + " x " + padval.toFixed(0) + "</td></tr>";
@@ -738,10 +771,10 @@ function deg_to_dms (deg) {
 function colorval(x,minval,maxval,cmapname){
     var cmap;
     if (cmapname ==='jet'){
-        cmap = ["#0000BF","#0000FF","#0040FF","#0080FF","#00BFFF","#00FFFF","#40FFBF","#80FF80","#BFFF40","#FFFF00","#FFBF00","#FF8000","#FF4000","#FF0000","#BF0000","#BF0000"];
+        cmap = ["#0000BF","#0000FF","#0040FF","#0080FF","#00BFFF","#00FFFF","#40FFBF","#80FF80","#BFFF40","#FFFF00","#FFBF00","#FF8000","#FF4000","#FF0000","#BF0000"];
     }
     else {
-        cmap = ["#3E26A8","#4538D7","#484FF2","#4367FD","#2F80FA","#2797EB","#1CAADF","#00B9C7","#29C3AA","#48CB86","#81CC59","#BBC42F","#EABA30","#FEC735","#F5E128","#F5E128"];
+        cmap = ["#3E26A8","#4538D7","#484FF2","#4367FD","#2F80FA","#2797EB","#1CAADF","#00B9C7","#29C3AA","#48CB86","#81CC59","#BBC42F","#EABA30","#FEC735","#F5E128"];
     }
 
     var m = (cmap.length)/(maxval-minval);
@@ -759,6 +792,7 @@ function colorval(x,minval,maxval,cmapname){
 
     return cmap[ind];
 }
+
 function calcDist(P1,P2){
     return ((P1[0]-P2[0])**2+(P1[1]-P2[1])**2)**0.5
 }

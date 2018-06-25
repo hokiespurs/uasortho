@@ -219,7 +219,7 @@
             <div class="form-group row">
                 <label for="selectscalar" class="col-4 col-form-label">Scalar</label>
                 <div class="col-8">
-                    <select class="form-control" id="selectscalar" name="Scalar" onclick="updateGSD();" onchange="updateGSD();">
+                    <select class="form-control" id="selectscalar" name="Scalar" onchange="updateGSD();recalcLims();">
                         <option value="none">None</option>
                         <option value="gsdx">Horizontal GSD</option>
                         <option value="gsdy" selected>Vertical GSD</option>
@@ -298,11 +298,17 @@
         -->
         <div id="attribution" ><a class="attr" href="https://hokiespurs.github.io/">&nbsp<i class="fab fa-github fa-lg"></i> Richie Slocum (2018)&nbsp</a></div>
 
+        <div id="colorbar">
+            <h3 id="colorbartitle" style="text-align: center;">Vertical GSD</h3>
+            <hr>
+            <canvas id="cv" width="200px" height="250px"></canvas>
+        </div>
+
         <div id="coordinateBox">
             <a id="cursorBox"></a>
         </div>
 
-        <div id="mapid" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
+        <div id="mapid"></div>
 
     </div>
     <!-- Info Modal -->
@@ -452,6 +458,89 @@
             $('#colormapimage').attr('src',"img/jet.png");
         else {
             $('#colormapimage').attr('src',"img/parula.png");
+        }
+        redrawcolorbar();
+    }
+    function recalcLims() {
+        myCamera.setgsdminmax = [myCamera.scalar.currentmin, myCamera.scalar.currentmax];
+        $('#inputCmin').val(myCamera.scalar.currentmin);
+        $('#inputCmax').val(myCamera.scalar.currentmax);
+        redrawcolorbar();
+    }
+
+    function redrawcolorbar() {
+        var minval = parseFloat(myCamera.scalar.minval);
+        var maxval = parseFloat(myCamera.scalar.maxval);
+        var scalarfield = myCamera.scalar.scalarfield;
+        var cmapname = myCamera.scalar.cmap2use;
+
+        // change colorbar title
+        var titlestr = "";
+        var units = "m";
+        if (scalarfield==="gsdy"){
+            titlestr = "Vertical GSD";
+            $('#colorbar').show();
+        }
+        else if (scalarfield==="gsdx"){
+            titlestr = "Horizontal GSD";
+            $('#colorbar').show();
+        }
+        else if (scalarfield==="stretch"){
+            titlestr = "Pixel Stretch";
+            $('#colorbar').show();
+            units = "";
+        }
+        else {
+            $('#colorbar').hide();
+        }
+
+        $('#colorbartitle').text(titlestr);
+
+
+
+        // REDRAW COLORBAR
+        var cv = document.getElementById('cv'),
+            ctx = cv.getContext('2d');
+
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        var TOTY = 225,
+            WIDTH = 50,
+            PADX = 50,
+            PADY = 10,
+            DY = 1/15 * TOTY;
+
+        if (cmapname ==='jet'){
+            cmap = ["#0000BF","#0000FF","#0040FF","#0080FF","#00BFFF","#00FFFF","#40FFBF","#80FF80","#BFFF40","#FFFF00","#FFBF00","#FF8000","#FF4000","#FF0000","#BF0000"];
+        }
+        else {
+            cmap = ["#3E26A8","#4538D7","#484FF2","#4367FD","#2F80FA","#2797EB","#1CAADF","#00B9C7","#29C3AA","#48CB86","#81CC59","#BBC42F","#EABA30","#FEC735","#F5E128"];
+        }
+
+        for (var i = 0; i < 15; i++) { // fill strokes
+            ctx.beginPath();
+
+            var color = cmap[i];
+            ctx.fillStyle = color;
+
+            var ypos = (i / 15) * TOTY;
+
+            ctx.fillRect(PADX, PADY+TOTY-ypos-DY, WIDTH, DY);
+        }
+
+        var maxypos = TOTY;
+
+        ctx.lineWidth=3;
+        ctx.font = "20px Times";
+        ctx.fillStyle = "black";
+        for (i=0;i<=1;i+=0.25){
+            ctx.beginPath();
+            ctx.moveTo(PADX,i*maxypos+PADY);
+            ctx.lineTo(PADX+WIDTH+5,i*maxypos+PADY);
+            ctx.stroke();
+
+            var txtval = maxval - i * (maxval-minval);
+            ctx.fillText(txtval.toFixed(3) + units,PADX+WIDTH+10,i*maxypos+PADY+5);
         }
 
     }
