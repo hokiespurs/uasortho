@@ -1,9 +1,9 @@
-var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',{
+var osm = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
     maxNativeZoom: 19,
     maxZoom: 23
 });
 
-var arcgis = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+var arcgis = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
     maxNativeZoom: 21,
     maxZoom: 23
 });
@@ -19,7 +19,7 @@ var mymap = L.map('mapid', {
 });
 
 var baseMaps = {
-    "Open Street Map": osm,
+    "CartoDB": osm,
     "Satellite": arcgis
 };
 
