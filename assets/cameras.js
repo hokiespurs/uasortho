@@ -1,6 +1,12 @@
 // sourced from 'camerasBuiltin.xml' from missionplanner using Matlab
 let cameras = [
     {
+        "name": "DJI Mavic Pro",
+        "f": "3004",
+        "pixx": "4000",
+        "pixy": "3000",
+    },
+    {
         "name": "Nikon aw100",
         "f": "3740.3",
         "pixx": "4608",
