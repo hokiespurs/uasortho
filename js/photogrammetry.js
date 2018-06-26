@@ -783,6 +783,9 @@ function colorval(x,minval,maxval,cmapname){
     var y = m*x + b;
 
     let ind = Math.round(y);
+    if (minval===maxval) {
+        ind = Math.round((cmap.length-1)/2)
+    }
     if (ind<0){
         ind=0;
     }
